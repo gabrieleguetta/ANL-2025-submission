@@ -12,6 +12,10 @@ from anl2025.negotiator import ANL2025Negotiator
 from negmas import (
     ResponseType, )
 
+from .helpers.helperfunctions import (
+    set_id_dict, did_negotiation_end, is_edge_agent, get_agreement_at_index,
+    get_nmi_from_index, get_negid_from_index
+)
 
 # be careful: When running directly from this file, change the relative import to an absolute import. When submitting, use relative imports.
 # from helpers.helperfunctions import set_id_dict, ...
@@ -36,7 +40,7 @@ class NewNegotiator(ANL2025Negotiator):
 
         # Map negotiation index to negotiator id
         self.id_dict = {}
-        self._set_id_dict()
+        set_id_dict(self)
 
         # For analyzing utility patterns
         self.best_pattern = None
@@ -44,43 +48,9 @@ class NewNegotiator(ANL2025Negotiator):
         self.num_negotiations = len(self.id_dict)
 
         # Precompute best utility combinations
-        if not self._is_edge_agent():
+        if not is_edge_agent(self):
             self._analyze_utility_patterns()
 
-    def _set_id_dict(self):
-        """Maps negotiation index to negotiator id."""
-        for neg_id in self.negotiators.keys():
-            index = self.negotiators[neg_id].context.get('index', -1)
-            self.id_dict[index] = neg_id
-
-    def _is_edge_agent(self):
-        """Returns True if this is an edge agent, False for center agent."""
-        return 'edge' in self.id
-
-    def _did_negotiation_end(self):
-        """Checks if a negotiation has ended and a new one has started."""
-        current_index = len(self.finished_negotiators)
-        if current_index > self.current_neg_index:
-            # Store the agreement from the just-ended negotiation
-            if self.current_neg_index >= 0:
-                agreement = self._get_agreement_at_index(self.current_neg_index)
-                while len(self.agreements) <= self.current_neg_index:
-                    self.agreements.append(None)
-                self.agreements[self.current_neg_index] = agreement
-
-            self.current_neg_index = current_index
-            return True
-        return False
-
-    def _get_agreement_at_index(self, index):
-        """Get the agreement reached in the negotiation with the given index."""
-        if index < 0 or index >= len(self.finished_negotiators):
-            return None
-        neg_id = self.id_dict.get(index)
-        if not neg_id:
-            return None
-        nmi = self.negotiators[neg_id].negotiator.nmi
-        return nmi.state.agreement
 
     def _get_possible_outcomes(self, neg_id):
         """Get all possible outcomes for a negotiation by id."""
@@ -97,7 +67,7 @@ class NewNegotiator(ANL2025Negotiator):
         Analyze utility patterns to find the best agreement pattern.
         """
         # Skip for edge agents
-        if self._is_edge_agent():
+        if is_edge_agent(self):
             return
 
         # Get all possible outcomes for each negotiation
@@ -156,7 +126,7 @@ class NewNegotiator(ANL2025Negotiator):
     def _find_best_outcome(self, negotiator_id):
         """Find the best outcome for the current negotiation."""
         # For edge agents, find outcome with highest utility
-        if self._is_edge_agent():
+        if is_edge_agent(self):
             best_outcome = None
             best_utility = float('-inf')
 
@@ -215,12 +185,12 @@ class NewNegotiator(ANL2025Negotiator):
     def propose(self, negotiator_id, state, dest=None):
         """Generate a proposal in the negotiation."""
         # Check if negotiation has ended and update strategy
-        if self._did_negotiation_end():
+        if did_negotiation_end(self):
             # Do nothing, we'll find the best outcome when needed
             pass
 
         # For edge agents
-        if self._is_edge_agent():
+        if is_edge_agent(self):
             return self._find_best_outcome(negotiator_id)
 
         # For center agents
@@ -248,7 +218,7 @@ class NewNegotiator(ANL2025Negotiator):
     def respond(self, negotiator_id, state, source=None):
         """Respond to a proposal in the negotiation."""
         # Check if negotiation has ended and update strategy
-        if self._did_negotiation_end():
+        if did_negotiation_end(self):
             # Do nothing, we'll calculate when needed
             pass
 
@@ -257,7 +227,7 @@ class NewNegotiator(ANL2025Negotiator):
             return ResponseType.REJECT_OFFER
 
         # For edge agents
-        if self._is_edge_agent():
+        if is_edge_agent(self):
             # Calculate utilities
             offer_utility = self.ufun(state.current_offer)
             best_outcome = self._find_best_outcome(negotiator_id)
