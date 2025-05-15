@@ -1,25 +1,42 @@
 """
 **Submitted to ANAC 2025 Automated Negotiation League**
-*Team* ANL Negotiation Team
-*Authors* ANL Negotiation Team
+*Team* type your team name here
+*Authors* type your team member names with their emails here
 
 This code is free to use or update given that proper attribution is given to
 the authors and the ANAC 2025 ANL competition.
 """
-from negmas.outcomes import Outcome
-from negmas.sao.controllers import SAOState
-from negmas import ResponseType
-from anl2025.negotiator import ANL2025Negotiator
 import itertools
+from negmas.outcomes import Outcome
+
+from .helpers.helperfunctions import set_id_dict, did_negotiation_end, get_target_bid_at_current_index, is_edge_agent, \
+    find_best_bid_in_outcomespace
+#be careful: When running directly from this file, change the relative import to an absolute import. When submitting, use relative imports.
+#from helpers.helperfunctions import set_id_dict, ...
+
+from anl2025.negotiator import ANL2025Negotiator
+from negmas.sao.controllers import SAOController, SAOState
+from negmas import (
+    DiscreteCartesianOutcomeSpace,
+    ExtendedOutcome,
+    ResponseType, CategoricalIssue,
+)
 
 class NewNegotiator(ANL2025Negotiator):
     """
-    A strategic negotiation agent for the ANL 2025 competition.
+    Your agent code. This is the ONLY class you need to implement
+    This example agent aims for the absolute best bid available. As a center agent, it adapts its strategy after each negotiation, by aiming for the best bid GIVEN the previous outcomes.
     """
 
+    """
+       The most general way to implement an agent is to implement propose and respond.
+       """
+
     def init(self):
-        """Executed when the agent is created."""
-        # Initialize tracking variables
+        """Executed when the agent is created. In ANL2025, all agents are initialized before the tournament starts."""
+        #print("init")
+
+        #Initalize variables
         self.current_neg_index = -1
         self.agreements = []
 
@@ -201,6 +218,7 @@ class NewNegotiator(ANL2025Negotiator):
 
         return best_outcome
 
+
     def propose(self, negotiator_id, state, dest=None):
         """Generate a proposal in the negotiation."""
         # Check if negotiation has ended and update strategy
@@ -338,3 +356,12 @@ class NewNegotiator(ANL2025Negotiator):
                     return ResponseType.ACCEPT_OFFER
 
         return ResponseType.REJECT_OFFER
+
+
+# if you want to do a very small test, use the parameter small=True here. Otherwise, you can use the default parameters.
+if __name__ == "__main__":
+    from helpers.runner import run_a_tournament
+    #Be careful here. When running directly from this file, relative imports give an error, e.g. import .helpers.helpfunctions.
+    #Change relative imports (i.e. starting with a .) at the top of the file. However, one should use relative imports when submitting the agent!
+
+    run_a_tournament(NewNegotiator, small=True)
