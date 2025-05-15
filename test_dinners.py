@@ -80,7 +80,7 @@ def test_on_dinners_scenario():
             if agent_type == NewNegotiator:
                 print(f"NewNegotiator is edge {j} with utility: {results.edge_utilities[j]}")
 
-    print("\n===== Comparing all agents in both roles =====")
+    print("\n===== Comparing all agents as center against edges Boulware2025, Linear2025, Random2025 =====")
 
     # Compare all agents in center role
     all_agents = [NewNegotiator, Boulware2025, Linear2025, Random2025]
