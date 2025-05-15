@@ -180,8 +180,7 @@ class NewNegotiator(ANL2025Negotiator):
 
         # If no pattern available, calculate best outcome in context
         context = list(self.agreements)
-        while len(context) < self.current_neg_index:
-            context.append(None)
+        context += [None] * (self.current_neg_index - len(context))
 
         best_outcome = None
         best_utility = float('-inf')
