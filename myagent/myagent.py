@@ -13,7 +13,7 @@ from negmas import (
     ResponseType, )
 
 from .helpers.helperfunctions import (
-    set_id_dict, did_negotiation_end, is_edge_agent
+    set_id_dict, did_negotiation_end, is_edge_agent, get_agreement_at_index
 )
 
 
@@ -32,9 +32,9 @@ class NewNegotiator(ANL2025Negotiator):
 
     def init(self):
         """Executed when the agent is created. In ANL2025, all agents are initialized before the tournament starts."""
-        #print("init")
+        # print("init")
 
-        #Initalize variables
+        # Initalize variables
         self.current_neg_index = -1
         self.agreements = []
 
@@ -50,7 +50,6 @@ class NewNegotiator(ANL2025Negotiator):
         # Precompute best utility combinations
         if not is_edge_agent(self):
             self._analyze_utility_patterns()
-
 
     def _get_possible_outcomes(self, neg_id):
         """Get all possible outcomes for a negotiation by id."""
@@ -181,13 +180,11 @@ class NewNegotiator(ANL2025Negotiator):
 
         return best_outcome
 
-
     def propose(self, negotiator_id, state, dest=None):
         """Generate a proposal in the negotiation."""
         # Check if negotiation has ended and update strategy
         if did_negotiation_end(self):
-            # Do nothing, we'll find the best outcome when needed
-            pass
+            self._update_agreements_if_needed()
 
         # For edge agents
         if is_edge_agent(self):
@@ -219,8 +216,7 @@ class NewNegotiator(ANL2025Negotiator):
         """Respond to a proposal in the negotiation."""
         # Check if negotiation has ended and update strategy
         if did_negotiation_end(self):
-            # Do nothing, we'll calculate when needed
-            pass
+            self._update_agreements_if_needed()
 
         # If no offer, reject
         if state.current_offer is None:
@@ -320,11 +316,25 @@ class NewNegotiator(ANL2025Negotiator):
 
         return ResponseType.REJECT_OFFER
 
+    def _update_agreements_if_needed(self):
+        """Update the agreements list if a negotiation has ended."""
+        if did_negotiation_end(self):
+            # Store the agreement from the just-ended negotiation
+            prev_index = self.current_neg_index - 1
+            if prev_index >= 0:
+                agreement = get_agreement_at_index(self, prev_index)
+                while len(self.agreements) <= prev_index:
+                    self.agreements.append(None)
+                self.agreements[prev_index] = agreement
+                return True
+        return False
+
 
 # if you want to do a very small test, use the parameter small=True here. Otherwise, you can use the default parameters.
 if __name__ == "__main__":
     from helpers.runner import run_a_tournament
-    #Be careful here. When running directly from this file, relative imports give an error, e.g. import .helpers.helpfunctions.
-    #Change relative imports (i.e. starting with a .) at the top of the file. However, one should use relative imports when submitting the agent!
+
+    # Be careful here. When running directly from this file, relative imports give an error, e.g. import .helpers.helpfunctions.
+    # Change relative imports (i.e. starting with a .) at the top of the file. However, one should use relative imports when submitting the agent!
 
     run_a_tournament(NewNegotiator, small=True)
