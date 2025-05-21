@@ -85,11 +85,7 @@ class NewNegotiator(ANL2025Negotiator):
             # Evaluate combinations grouping by number of agreements
             patterns_by_count = {0: [], 1: [], 2: [], 3: []}
 
-            import random
-            max_samples = 1000  # Limit the number of combinations to evaluate
-            sampled_combos = random.sample(list(itertools.product(*outcome_spaces)), 
-                                           min(max_samples, len(list(itertools.product(*outcome_spaces)))))
-            for combo in sampled_combos:
+            for combo in itertools.product(*outcome_spaces):
                 # Count agreements
                 agreement_count = sum(1 for outcome in combo if outcome is not None)
 
