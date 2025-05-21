@@ -10,7 +10,7 @@ from myagent.myagent import NewNegotiator
 def test_on_dinners_scenario():
     """Test the NewNegotiator on the dinners scenario."""
     # Load the dinners scenario
-    path = pathlib.Path("official_test_scenarios/dinners")
+    path = pathlib.Path("")
     scenario = MultidealScenario.from_folder(path)
 
     print("\n===== Testing NewNegotiator as center agent =====")
