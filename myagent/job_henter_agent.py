@@ -41,7 +41,6 @@ class JobHunterNegotiator(ANL2025Negotiator):
         #Initalize variables
         self.current_neg_index = -1
         self.target_bid = None
-        self.is_debugging = False
 
         # Make a dictionary that maps the index of the negotiation to the negotiator id. The index of the negotiation is the order in which the negotiation happen in sequence.
         self.id_dict = {}
@@ -51,6 +50,7 @@ class JobHunterNegotiator(ANL2025Negotiator):
     def define_consts(self):
         self.min_val_idx_acceptable = 0.35
         self.rel_t_for_agreements = 0.3
+        self.is_debugging = False
 
     def propose(
             self, negotiator_id: str, state: SAOState, dest: str | None = None
