@@ -41,6 +41,7 @@ class JobHunterNegotiator(ANL2025Negotiator):
         #Initalize variables
         self.current_neg_index = -1
         self.target_bid = None
+        self.is_debugging = False
 
         # Make a dictionary that maps the index of the negotiation to the negotiator id. The index of the negotiation is the order in which the negotiation happen in sequence.
         self.id_dict = {}
@@ -70,7 +71,7 @@ class JobHunterNegotiator(ANL2025Negotiator):
         bid = self.generate_bid_with_concession(negotiator_id, relative_time)
         
         # if you want to end the negotiation, return None
-        print("propose {0} to {1} at step {2}.".format(bid, negotiator_id, self.c_step_))
+        self.my_print("propose {0} to {1} at step {2}.".format(bid, negotiator_id, self.c_step_))
         return bid
 
     def get_offer_util_idx(self, offer):
@@ -100,10 +101,10 @@ class JobHunterNegotiator(ANL2025Negotiator):
         #if state.current_offer is get_target_bid_at_current_index(self):
         if (self.c_round_ == 0 and state.current_offer is get_target_bid_at_current_index(self)) or \
         (self.c_round_ > 0 and self.improvement_by_offer(state.current_offer) > 0):
-            print("offer {0} accepted.".format(state.current_offer))
+            self.my_print("offer {0} accepted.".format(state.current_offer))
             return ResponseType.ACCEPT_OFFER
 
-        print("offer {0} rejected.".format(state.current_offer))
+        self.my_print("offer {0} rejected.".format(state.current_offer))
         return ResponseType.REJECT_OFFER
         # You can also return ResponseType.END_NEGOTIATION to end the negotiation.
 
@@ -254,6 +255,9 @@ class JobHunterNegotiator(ANL2025Negotiator):
         """Get negotiator mechanism interface from negotiator ID."""
         return self.negotiators[negotiators_id].negotiator.nmi
 
+    def my_print(self, str):
+        if self.is_debugging:
+            print(str)
 
 # if you want to do a very small test, use the parameter small=True here. Otherwise, you can use the default parameters.
 if __name__ == "__main__":
