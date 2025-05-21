@@ -45,6 +45,11 @@ class JobHunterNegotiator(ANL2025Negotiator):
         # Make a dictionary that maps the index of the negotiation to the negotiator id. The index of the negotiation is the order in which the negotiation happen in sequence.
         self.id_dict = {}
         set_id_dict(self)
+        self.define_consts()
+
+    def define_consts(self):
+        self.min_val_idx_acceptable = 0.35
+        self.rel_t_for_agreements = 0.3
 
     def propose(
             self, negotiator_id: str, state: SAOState, dest: str | None = None
@@ -204,7 +209,7 @@ class JobHunterNegotiator(ANL2025Negotiator):
 
 
     def find_bid_with_utility_level(self, concession_factor, possible_by_utilities: list[Outcome]):
-        worst_acceptable = 0.4
+        worst_acceptable = self.min_val_idx_acceptable
         normalized_conc_fact = concession_factor * worst_acceptable + worst_acceptable
         possible_index = int((len(possible_by_utilities) - 1) * normalized_conc_fact)
         return possible_by_utilities[possible_index][0]
@@ -244,7 +249,7 @@ class JobHunterNegotiator(ANL2025Negotiator):
             #return best_bid
         
         # As time progresses, be willing to accept worse bids
-        if relative_time > 0.3:
+        if relative_time > self.rel_t_for_agreements:
             return best_bid
         
         # In final stages, consider concession
