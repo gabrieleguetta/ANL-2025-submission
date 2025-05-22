@@ -1,0 +1,60 @@
+name: Manufacturer
+type: anl2025.ufun.LambdaCenterUFun
+reserved_value: 0.0
+n_edges: 4
+outcome_spaces:
+  - type: DiscreteCartesianOutcomeSpace
+    name: SteelSupplier
+    issues:
+    - type: DiscreteCardinalIssue
+      name: Quantity
+      values: [50, 100, 150, 200, 250]
+    - type: CategoricalIssue
+      name: Quality
+      values: ['standard', 'premium', 'ultra']
+    - type: DiscreteCardinalIssue
+      name: Price
+      values: [800, 1000, 1200, 1500, 1800]
+  - type: DiscreteCartesianOutcomeSpace
+    name: ElectronicsSupplier
+    issues:
+    - type: DiscreteCardinalIssue
+      name: Quantity
+      values: [20, 40, 60, 80, 100]
+    - type: CategoricalIssue
+      name: Quality
+      values: ['standard', 'premium', 'ultra']
+    - type: DiscreteCardinalIssue
+      name: Price
+      values: [2000, 2500, 3000, 3500, 4000]
+  - type: DiscreteCartesianOutcomeSpace
+    name: PackagingSupplier
+    issues:
+    - type: DiscreteCardinalIssue
+      name: Quantity
+      values: [500, 750, 1000, 1250, 1500]
+    - type: CategoricalIssue
+      name: Quality
+      values: ['standard', 'premium', 'ultra']
+    - type: DiscreteCardinalIssue
+      name: Price
+      values: [300, 400, 500, 600, 700]
+  - type: DiscreteCartesianOutcomeSpace
+    name: LogisticsProvider
+    issues:
+    - type: CategoricalIssue
+      name: Speed
+      values: ['standard', 'express', 'priority']
+    - type: CategoricalIssue
+      name: Reliability
+      values: ['basic', 'guaranteed', 'premium']
+    - type: DiscreteCardinalIssue
+      name: Cost
+      values: [1000, 1500, 2000, 2500, 3000]
+evaluator:
+  type: supply_chain_center.SupplyChainEvaluator
+  reserved_value: 0.0
+  target_steel: 200
+  target_electronics: 80
+  target_packaging: 1000
+  budget_limit: 12000

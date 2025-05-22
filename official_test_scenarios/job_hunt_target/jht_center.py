@@ -8,6 +8,7 @@ import pathlib
 from myagent.job_henter_agent import JobHunterNegotiator
 from myagent.myagent import NewNegotiator
 from myagent.dinners_agent import DinnersNegotiator
+from myagent.job_dinner_agent import UnifiedNegotiator
 
 
 def test_on_job_hunt_scenario():
@@ -16,16 +17,17 @@ def test_on_job_hunt_scenario():
     path = pathlib.Path("official_test_scenarios/job_hunt_target")
     scenario = MultidealScenario.from_folder(path)
 
-    print("\n===== Testing NewNegotiator as center agent (employer) =====")
+    print("\n===== Testing NewNegotiator as center agent (employee) =====")
 
     # Test against different edge agent combinations
-    # The job_hunt_target scenario has 4 edges (employees)
+    # The job_hunt_target scenario has 4 edges (employers)
     edge_combinations = [
         [Boulware2025, Boulware2025, Boulware2025, Boulware2025],
         [Linear2025, Linear2025, Linear2025, Linear2025],
         [Random2025, Random2025, Random2025, Random2025],
         [JobHunterNegotiator, JobHunterNegotiator, JobHunterNegotiator, JobHunterNegotiator],
         [DinnersNegotiator, DinnersNegotiator, DinnersNegotiator, DinnersNegotiator],
+        [UnifiedNegotiator, UnifiedNegotiator, UnifiedNegotiator, UnifiedNegotiator],
         [Boulware2025, Linear2025, Random2025, Linear2025]
     ]
 
@@ -41,10 +43,10 @@ def test_on_job_hunt_scenario():
         print(f"Edge Utilities: {results.edge_utilities}")
         print(f"Agreements: {results.agreements}")
 
-    print("\n===== Testing NewNegotiator as edge agent (employee) =====")
+    print("\n===== Testing NewNegotiator as edge agent (employer) =====")
 
     # Test against different center agents
-    center_agents = [Boulware2025, JobHunterNegotiator, DinnersNegotiator]
+    center_agents = [Boulware2025, JobHunterNegotiator, DinnersNegotiator, UnifiedNegotiator]
 
     for i, center_agent in enumerate(center_agents):
         print(f"\nTest {i+1}: Against center agent {center_agent.__name__}")
@@ -60,10 +62,10 @@ def test_on_job_hunt_scenario():
         print(f"Agreements: {results.agreements}")
         print(f"NewNegotiator is edge 0 with utility: {results.edge_utilities[0]}")
 
-    print("\n===== Comparing all agents as center (employer) =====")
+    print("\n===== Comparing all agents as center (employee) =====")
 
     # Compare all agents in center role
-    all_agents = [NewNegotiator, Boulware2025, JobHunterNegotiator, DinnersNegotiator]
+    all_agents = [NewNegotiator, Boulware2025, JobHunterNegotiator, DinnersNegotiator, UnifiedNegotiator]
     edge_agents = [Boulware2025, Linear2025, Random2025, Linear2025]
 
     for center_agent in all_agents:
