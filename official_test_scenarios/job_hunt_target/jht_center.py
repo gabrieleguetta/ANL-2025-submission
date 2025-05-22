@@ -17,10 +17,10 @@ def test_on_job_hunt_scenario():
     path = pathlib.Path("official_test_scenarios/job_hunt_target")
     scenario = MultidealScenario.from_folder(path)
 
-    print("\n===== Testing NewNegotiator as center agent (employee) =====")
+    print("\n===== Testing NewNegotiator as center agent (employer) =====")
 
     # Test against different edge agent combinations
-    # The job_hunt_target scenario has 4 edges (employers)
+    # The job_hunt_target scenario has 4 edges (employees)
     edge_combinations = [
         [Boulware2025, Boulware2025, Boulware2025, Boulware2025],
         [Linear2025, Linear2025, Linear2025, Linear2025],
@@ -43,7 +43,7 @@ def test_on_job_hunt_scenario():
         print(f"Edge Utilities: {results.edge_utilities}")
         print(f"Agreements: {results.agreements}")
 
-    print("\n===== Testing NewNegotiator as edge agent (employer) =====")
+    print("\n===== Testing NewNegotiator as edge agent (employee) =====")
 
     # Test against different center agents
     center_agents = [Boulware2025, JobHunterNegotiator, DinnersNegotiator, ImprovedUnifiedNegotiator]
@@ -62,7 +62,7 @@ def test_on_job_hunt_scenario():
         print(f"Agreements: {results.agreements}")
         print(f"NewNegotiator is edge 0 with utility: {results.edge_utilities[0]}")
 
-    print("\n===== Comparing all agents as center (employee) =====")
+    print("\n===== Comparing all agents as center (employer) =====")
 
     # Compare all agents in center role
     all_agents = [NewNegotiator, Boulware2025, JobHunterNegotiator, DinnersNegotiator, ImprovedUnifiedNegotiator]
