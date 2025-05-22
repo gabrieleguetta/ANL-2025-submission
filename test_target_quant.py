@@ -17,10 +17,10 @@ def test_on_target_quant_scenario():
 
     # Test against different edge agent combinations
     edge_combinations = [
-        [Boulware2025, Boulware2025, Boulware2025],
-        [Linear2025, Linear2025, Linear2025],
-        [Random2025, Random2025, Random2025],
-        [Boulware2025, Linear2025, Random2025]
+        # [Boulware2025, Boulware2025, Boulware2025],
+        # [Linear2025, Linear2025, Linear2025],
+        # [Random2025, Random2025, Random2025],
+        # [Boulware2025, Linear2025, Random2025]
     ]
 
     for i, edge_agents in enumerate(edge_combinations):
@@ -56,10 +56,10 @@ def test_on_target_quant_scenario():
 
     # Test cases where NewNegotiator is mixed with other agent types as edges
     mixed_edge_combinations = [
-        [NewNegotiator, Boulware2025, Linear2025],
-        [NewNegotiator, Random2025, Boulware2025],
-        [Boulware2025, NewNegotiator, Random2025],
-        [Linear2025, Random2025, NewNegotiator]
+        [NewNegotiator, Boulware2025, Linear2025, Boulware2025],
+        [NewNegotiator, Random2025, NewNegotiator, Boulware2025],
+        [Boulware2025, Random2025, NewNegotiator, Random2025],
+        [Linear2025, Random2025, NewNegotiator, NewNegotiator]
     ]
 
     for i, edge_agents in enumerate(mixed_edge_combinations):
@@ -83,11 +83,11 @@ def test_on_target_quant_scenario():
     print("\n===== Comparing all agents as center against edges Boulware2025, Linear2025, Random2025 =====")
 
     # Compare all agents in center role
-    all_agents = [NewNegotiator, Boulware2025, Linear2025, Random2025]
+    all_agents = [NewNegotiator, Boulware2025, Linear2025, Random2025, Linear2025] 
 
     for center_agent in all_agents:
         # Use a balanced set of opponents
-        edge_agents = [Boulware2025, Linear2025, Random2025]
+        edge_agents = [Boulware2025, Linear2025, Random2025, Linear2025]
         print(f"\nTest with {center_agent.__name__} as center:")
         results = run_session(
             scenario=scenario,
