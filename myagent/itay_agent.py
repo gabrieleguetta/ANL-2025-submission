@@ -255,7 +255,7 @@ class NewNegotiator(ANL2025Negotiator):
                     dict_outcome_space[i] = [ufun(i), level, i_rejected[i], opponent_rejected[i]]
         self.trace_by_neg[negotiator_id] = dict_outcome_space
         if is_edge_agent(self):
-                return self._find_best_outcome(negotiator_id, self.trace_by_neg[negotiator_id][dest])
+                return self._find_best_outcome(negotiator_id, self.trace_by_neg[negotiator_id])
 
         # For center agents
         # Special case for 3-negotiation scenarios
