@@ -8,7 +8,7 @@ import pathlib
 from myagent.job_henter_agent import JobHunterNegotiator
 from myagent.myagent import NewNegotiator
 from myagent.dinners_agent import DinnersNegotiator
-from myagent.job_dinner_agent import UnifiedNegotiator
+from myagent.job_dinner_agent import ImprovedUnifiedNegotiator
 
 
 def test_on_job_hunt_scenario():
@@ -27,7 +27,7 @@ def test_on_job_hunt_scenario():
         [Random2025, Random2025, Random2025, Random2025],
         [JobHunterNegotiator, JobHunterNegotiator, JobHunterNegotiator, JobHunterNegotiator],
         [DinnersNegotiator, DinnersNegotiator, DinnersNegotiator, DinnersNegotiator],
-        [UnifiedNegotiator, UnifiedNegotiator, UnifiedNegotiator, UnifiedNegotiator],
+        [ImprovedUnifiedNegotiator, ImprovedUnifiedNegotiator, ImprovedUnifiedNegotiator, ImprovedUnifiedNegotiator],
         [Boulware2025, Linear2025, Random2025, Linear2025]
     ]
 
@@ -46,7 +46,7 @@ def test_on_job_hunt_scenario():
     print("\n===== Testing NewNegotiator as edge agent (employer) =====")
 
     # Test against different center agents
-    center_agents = [Boulware2025, JobHunterNegotiator, DinnersNegotiator, UnifiedNegotiator]
+    center_agents = [Boulware2025, JobHunterNegotiator, DinnersNegotiator, ImprovedUnifiedNegotiator]
 
     for i, center_agent in enumerate(center_agents):
         print(f"\nTest {i+1}: Against center agent {center_agent.__name__}")
@@ -65,7 +65,7 @@ def test_on_job_hunt_scenario():
     print("\n===== Comparing all agents as center (employee) =====")
 
     # Compare all agents in center role
-    all_agents = [NewNegotiator, Boulware2025, JobHunterNegotiator, DinnersNegotiator, UnifiedNegotiator]
+    all_agents = [NewNegotiator, Boulware2025, JobHunterNegotiator, DinnersNegotiator, ImprovedUnifiedNegotiator]
     edge_agents = [Boulware2025, Linear2025, Random2025, Linear2025]
 
     for center_agent in all_agents:
