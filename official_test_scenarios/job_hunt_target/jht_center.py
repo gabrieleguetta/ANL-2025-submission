@@ -11,13 +11,38 @@ from myagent.dinners_agent import DinnersNegotiator
 from myagent.job_dinner_agent import ImprovedUnifiedNegotiator
 
 
+def run_tour(edge_agents, center_type, scenario, i):
+    results = run_session(
+        scenario=scenario,
+        center_type=center_type,
+        edge_types=edge_agents,
+        nsteps=10,
+    )
+    print(f"Center utility: {results.center_utility}")
+    print(f"agents: \t\t" + " | ".join(f"{edge.__name__:<20}" for edge in edge_agents))
+    print(f"Edge Utilities: \t" + " | ".join(f"{r:<20}" for r in results.edge_utilities))
+    print(f"Agreements: \t\t" + " | ".join(f"({','.join(str(sub_a) for sub_a in a) if a != None else 'None'})".ljust(20) for a in results.agreements))
+
+
+
+def test_center(edge_combinations, center_type, scenario):
+    print(f"\n===== Testing {center_type.__name__} as center agent (employer) =====")
+    
+    for i, edge_agents in enumerate(edge_combinations):
+        print(f"\nTest {i+1}: Against {[agent.__name__ for agent in edge_agents]}")
+        run_tour(edge_agents, center_type, scenario, i)
+
+def test_edge(center_agents, edge_combination, scenario):
+    for i, center_agent in enumerate(center_agents):
+        print(f"\nTest {i+1}: Against center agent {center_agent.__name__}")
+        run_tour(edge_combination, center_agent, scenario, i)
+
+
 def test_on_job_hunt_scenario():
-    """Test the NewNegotiator on the job_hunt_target scenario."""
+    """Test the ImprovedUnifiedNegotiator on the job_hunt_target scenario."""
     # Load the job_hunt_target scenario
     path = pathlib.Path("official_test_scenarios/job_hunt_target")
     scenario = MultidealScenario.from_folder(path)
-
-    print("\n===== Testing NewNegotiator as center agent (employer) =====")
 
     # Test against different edge agent combinations
     # The job_hunt_target scenario has 4 edges (employees)
@@ -31,54 +56,25 @@ def test_on_job_hunt_scenario():
         [Boulware2025, Linear2025, Random2025, Linear2025]
     ]
 
-    for i, edge_agents in enumerate(edge_combinations):
-        print(f"\nTest {i+1}: Against {[agent.__name__ for agent in edge_agents]}")
-        results = run_session(
-            scenario=scenario,
-            center_type=NewNegotiator,
-            edge_types=edge_agents,
-            nsteps=10,
-        )
-        print(f"Center utility: {results.center_utility}")
-        print(f"Edge Utilities: {results.edge_utilities}")
-        print(f"Agreements: {results.agreements}")
+    test_center(edge_combinations, ImprovedUnifiedNegotiator, scenario)
+
+    test_center(edge_combinations, JobHunterNegotiator, scenario)
 
     print("\n===== Testing NewNegotiator as edge agent (employee) =====")
 
     # Test against different center agents
     center_agents = [Boulware2025, JobHunterNegotiator, DinnersNegotiator, ImprovedUnifiedNegotiator]
-
-    for i, center_agent in enumerate(center_agents):
-        print(f"\nTest {i+1}: Against center agent {center_agent.__name__}")
-        # Place NewNegotiator as the first edge agent, with a mix of other agents
-        results = run_session(
-            scenario=scenario,
-            center_type=center_agent,
-            edge_types=[NewNegotiator, Boulware2025, JobHunterNegotiator, DinnersNegotiator],
-            nsteps=10,
-        )
-        print(f"Center utility: {results.center_utility}")
-        print(f"Edge Utilities: {results.edge_utilities}")
-        print(f"Agreements: {results.agreements}")
-        print(f"NewNegotiator is edge 0 with utility: {results.edge_utilities[0]}")
+    edge_types = [JobHunterNegotiator, DinnersNegotiator, DinnersNegotiator, JobHunterNegotiator]
+    
+    test_edge(center_agents, edge_types, scenario)
 
     print("\n===== Comparing all agents as center (employer) =====")
 
     # Compare all agents in center role
     all_agents = [NewNegotiator, Boulware2025, JobHunterNegotiator, DinnersNegotiator, ImprovedUnifiedNegotiator]
-    edge_agents = [Boulware2025, Linear2025, Random2025, Linear2025]
+    edge_agents = [DinnersNegotiator, JobHunterNegotiator, JobHunterNegotiator, DinnersNegotiator]
 
-    for center_agent in all_agents:
-        print(f"\nTest with {center_agent.__name__} as center:")
-        results = run_session(
-            scenario=scenario,
-            center_type=center_agent,
-            edge_types=edge_agents,
-            nsteps=100,
-        )
-        print(f"Center utility: {results.center_utility}")
-        print(f"Edge Utilities: {results.edge_utilities}")
-        print(f"Agreements: {results.agreements}")
+    test_edge(all_agents, edge_agents, scenario)
 
 if __name__ == "__main__":
     test_on_job_hunt_scenario()
