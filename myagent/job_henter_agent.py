@@ -51,6 +51,7 @@ class JobHunterNegotiator(ANL2025Negotiator):
         self.min_val_idx_acceptable = 0.35
         self.rel_t_for_agreements = 0.3
         self.is_debugging = False
+        self.conssession_exp = 1/4
 
     def propose(
             self, negotiator_id: str, state: SAOState, dest: str | None = None
@@ -234,7 +235,7 @@ class JobHunterNegotiator(ANL2025Negotiator):
     def generate_bid_with_concession(self, negotiator_id, relative_time):
         """Generate a bid based on concession strategy."""
         # Boulware strategy: concede slowly at first, then faster
-        concession_factor = pow(relative_time, 1/4)  # Adjust exponent for concession speed
+        concession_factor = pow(relative_time, self.conssession_exp)  # Adjust exponent for concession speed
         
         # Start with best bid for us
         if is_edge_agent(self):
