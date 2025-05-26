@@ -8,7 +8,7 @@ the authors and the ANAC 2025 ANL competition.
 """
 import itertools
 from negmas.outcomes import Outcome
-
+import numpy
 from .helpers.helperfunctions import set_id_dict, did_negotiation_end, get_target_bid_at_current_index, is_edge_agent, \
     find_best_bid_in_outcomespace, get_agreement_at_index
 #be careful: When running directly from this file, change the relative import to an absolute import. When submitting, use relative imports.
@@ -131,11 +131,11 @@ class NewNegotiator(ANL2025Negotiator):
         # for o, vals in dict_outcome_space.items():
         #     if vals[3] == 0:
         #         pass
+        self.leverage = 2 *( int(negotiator_id[-1]) + 1)
         if is_edge_agent(self):
-            self.leverage = 2 *( int(negotiator_id[-1]) + 1)
             best_outcome = None
             best_utility = float('-inf')
-
+            self.pattern_outcomes = {}
             for outcome in self._get_possible_outcomes(negotiator_id):
                 try:
                     i_rejected = dict_outcome_space[outcome][2]
@@ -143,13 +143,11 @@ class NewNegotiator(ANL2025Negotiator):
                 except: 
                   i_rejected = opp_rejected = 0
                 #   tuple(str(int(outcome[0]) + (0.1 * i_rejected) - (0.1 * opp_rejected)))
-                utility = self.ufun(outcome) + (0.0005 * i_rejected) - (0.01 * opp_rejected * (1/self.leverage))
-                
-
+                utility = ((6 / self.leverage) * (self.ufun(outcome))) + (0.0005 * i_rejected) - (0.001 * opp_rejected * (1/self.leverage))
+                self.pattern_outcomes[outcome] = utility
                 if utility > best_utility:
                     best_outcome = outcome 
                     best_utility = utility
-
 
             return best_outcome, best_utility
 
@@ -161,7 +159,7 @@ class NewNegotiator(ANL2025Negotiator):
         context = list(self.agreements)
         len_ctxt = len(context)
         context += [None] #* (len(self.negotiators) - len(context))
-
+        self.pattern_outcomes = {}
         best_outcome = None
         best_utility = float('-inf')
 
@@ -177,13 +175,14 @@ class NewNegotiator(ANL2025Negotiator):
                 i_rejected = opp_rejected = 0
             sum_utility = 0
             num_utility = 0
+            combs_list = []
             for c in rest_combs:
                 test_context_comb = test_context.copy() + list(c)
-                utility = self.ufun(tuple(test_context_comb)) + (0.05 * i_rejected) - (0.05 * opp_rejected)
+                utility = ((8 / self.leverage) * self.ufun(tuple(test_context_comb))) + (0.001 * i_rejected) - ((0.01 * opp_rejected) * (3/self.leverage))
                 sum_utility += utility
                 num_utility += 1
             avg_util = sum_utility / num_utility
-
+            self.pattern_outcomes[outcome] = avg_util
 
   
             # Calculate utility
@@ -195,13 +194,13 @@ class NewNegotiator(ANL2025Negotiator):
                 best_utility = avg_util
 
         # # Try having no agreement
-        # test_context = context.copy()
+        test_context = context.copy()
         test_context += [None for i in range(len(self.negotiators.keys()) - (len_ctxt + 1))]
         # test_context[int(negotiator_id[1])] = None
         # Calculate utility
 
         none_utility = self.ufun(tuple(test_context))
-
+        
         if none_utility > best_utility:
             return None, 0
         return best_outcome, best_utility
@@ -209,6 +208,8 @@ class NewNegotiator(ANL2025Negotiator):
 
 
     def propose(self, negotiator_id, state, dest=None):
+        if negotiator_id.startswith('s'):
+            pass
         if negotiator_id != self.last_neg and self.last_neg != '':
             self.agreements.append(self.last_proposal)
         """Generate a proposal in the negotiation."""
@@ -258,19 +259,7 @@ class NewNegotiator(ANL2025Negotiator):
         if is_edge_agent(self):
                 best_outcome, best_utility = self._find_best_outcome(negotiator_id, self.trace_by_neg[negotiator_id])
                 # print(f'{self.id} proposed {best_outcome} to {dest}')
-                return best_outcome
-
-        # For center agents
-        # Special case for 3-negotiation scenarios
-        # Count agreements so far
-        agreement_count = sum(1 for a in self.agreements if a is not None)
-        if agreement_count >= 2:
-            pass
-                # Always end negotiation if we already have 2 agreements
-            # progress = self._get_progress(negotiator_id)
-            # if progress > 0.3:
-            #     return None
-
+                return best_outcome      
         # Find best outcome
         best_outcome, best_utility = self._find_best_outcome(negotiator_id, self.trace_by_neg)
 
@@ -279,12 +268,14 @@ class NewNegotiator(ANL2025Negotiator):
             progress = self._get_progress(negotiator_id)
             if progress > 0.3:
                 return None
-        print(f'{self.id} proposed {best_outcome} to {dest}')
+        # print(f'{self.id} proposed {best_outcome} to {dest}')
         self.last_proposal = best_outcome
         self.last_neg = negotiator_id
         return best_outcome
 
     def respond(self, negotiator_id, state, source=None):
+        if negotiator_id.startswith('s'):
+            pass
         """Respond to a proposal in the negotiation."""
         # Check if negotiation has ended and update strategy
         if did_negotiation_end(self):
@@ -296,112 +287,98 @@ class NewNegotiator(ANL2025Negotiator):
             # print(f'{self.id} responds REJECT')
             return ResponseType.REJECT_OFFER
         # print(f'{self.id} recieves {state.current_offer}')
+        negotiator, cntxt = self.negotiators[negotiator_id]
+        nmi = negotiator.nmi
+        level = self._get_progress(negotiator_id)
+        ufun: SideUFun = cntxt["ufun"]
+        step = state.step
+        current_offer = state.current_offer
+        my_offers = []
+        oponnent_offers = []
+        dict_outcome_space = {}
+        dict_outcome_space = {}
 
-        # For edge agents
-        if is_edge_agent(self):
+        if step != 0:
+            trace = nmi.extended_trace
+            opponent_rejected = {}
+            i_rejected = {}
+            for i in trace:
+                if i[1] == negotiator_id:
+                        my_offers.append(i[2])
+                        try:
+                            opponent_rejected[i[2]] += 1
+                        except:
+                            opponent_rejected[i[2]] = 1
+                else:
+                        oponnent_offers.append(i[2])
+                        try:
+                            i_rejected[i[2]] += 1
+                        except:
+                            i_rejected[i[2]] = 1
+            
+            
 
-            # Calculate utilities
-            offer_utility = self.ufun(state.current_offer)
-            if negotiator_id in self.trace_by_neg.keys():
-                d =self.trace_by_neg[negotiator_id]
-            else: d = {} 
-            best_outcome, best_utility = self._find_best_outcome(negotiator_id, d)
-            progress = self._get_progress(negotiator_id)
-            # print(f'offer utility: {offer_utility}, best outcome: {best_outcome}, best utility: {best_utility}')
-            if offer_utility >= best_utility:
-                # print(f'{self.id} responds ACCEPT')
-                return ResponseType.ACCEPT_OFFER
+                for i in nmi.outcome_space:
+                    if i not in i_rejected.keys():
+                        i_rejected[i] = 0
+                    if i not in opponent_rejected.keys():
+                        opponent_rejected[i] = 0
+                    dict_outcome_space[i] = [ufun(i), level, i_rejected[i], opponent_rejected[i]]
+        self.trace_by_neg[negotiator_id] = dict_outcome_space
+        # # For edge agents
+        # if is_edge_agent(self):
 
-            if progress > 0.7 and offer_utility >= 0.95 * best_utility:
-                # print(f'{self.id} responds ACCEPT')
-                return ResponseType.ACCEPT_OFFER
+        #     # Calculate utilities
+        #     offer_utility = self.ufun(state.current_offer)
+        #     if negotiator_id in self.trace_by_neg.keys():
+        #         d =self.trace_by_neg[negotiator_id]
+        #     else: d = {} 
+        #     best_outcome, best_utility = self._find_best_outcome(negotiator_id, d)
+        #     progress = self._get_progress(negotiator_id)
+        #     # print(f'offer utility: {offer_utility}, best outcome: {best_outcome}, best utility: {best_utility}')
+        #     if offer_utility >= best_utility:
+        #         # print(f'{self.id} responds ACCEPT')
+        #         return ResponseType.ACCEPT_OFFER
 
-            if progress > 0.9 and offer_utility >= 0.79 * best_utility:
-                # print(f'{self.id} responds ACCEPT')
-                return ResponseType.ACCEPT_OFFER
-        else:
-            # For center agents
-            # Special case for 3-negotiation scenarios
-            if self.num_negotiations == 3 and self.current_neg_index == 2:
-                # Count agreements so far
-                agreement_count = sum(1 for a in self.agreements if a is not None)
-                if agreement_count >= 2:
-                    # Always reject if we already have 2 agreements
-                    # print(f'{self.id} responds REJECT')
-                    return ResponseType.REJECT_OFFER
+        #     if progress > 0.7 and offer_utility >= 0.95 * best_utility:
+        #         # print(f'{self.id} responds ACCEPT')
+        #         return ResponseType.ACCEPT_OFFER
 
-            # Check if offer matches best pattern
-            if self.best_pattern and self.current_neg_index < len(self.best_pattern):
-                if state.current_offer == self.best_pattern[self.current_neg_index]:
-                    # print(f'{self.id} responds ACCEPT')
-                    return ResponseType.ACCEPT_OFFER
+        #     if progress > 0.9 and offer_utility >= 0.79 * best_utility:
+        #         # print(f'{self.id} responds ACCEPT')
+        #         return ResponseType.ACCEPT_OFFER
+        #     return ResponseType.REJECT_OFFER
+
+        # else:
 
             # Calculate utility of offer in context
-            context = list(self.agreements)
-            while len(context) < self.current_neg_index:
-                context.append(None)
+        context = list(self.agreements)
+        while len(context) < self.current_neg_index:
+            context.append(None)
 
-            test_context = context.copy()
-            test_context.append(state.current_offer)
+        test_context = context.copy()
+        test_context.append(state.current_offer)
 
             # Pad with None
-            while len(test_context) < self.num_negotiations:
-                test_context.append(None)
-
-            # Calculate utility of offer
-            offer_utility = self.ufun(tuple(test_context))
-
-            # Calculate utility with no agreement
-            test_context = context.copy()
+        while len(test_context) < self.num_negotiations:
             test_context.append(None)
 
-            # Pad with None
-            while len(test_context) < self.num_negotiations:
-                test_context.append(None)
-
-            # Calculate utility
-            none_utility = self.ufun(tuple(test_context))
-
-            # If no agreement is better, reject
-            if none_utility > offer_utility:
-                # print(f'{self.id} responds REJECT')
-                return ResponseType.REJECT_OFFER
-
-            # Check if this would be a good agreement
-            progress = self._get_progress(negotiator_id)
-
-            # Early phase: only accept if it matches best pattern
-            if progress < 0.4:
-                # print(f'{self.id} responds REJECT')
-                return ResponseType.REJECT_OFFER
-
-            # Middle phase: accept if utility is good
-            if progress < 0.7:
-                # Calculate utility of best possible outcome
-                if negotiator_id not in self.trace_by_neg.keys():
-                    d = {}
-                else: d =self.trace_by_neg[negotiator_id]
-                best_outcome, best_utility = self._find_best_outcome(negotiator_id, d)
-                if best_outcome is not None:
-                    test_context = context.copy()
-                    test_context.append(best_outcome)
-
-                    # Pad with None
-                    while len(test_context) < self.num_negotiations:
-                        test_context.append(None)
-
-                    # Calculate utility
-                    best_utility = self.ufun(tuple(test_context))
-                    if offer_utility >= 0.9 * best_utility:
-                        # print(f'{self.id} responds ACCEPT')
-                        return ResponseType.ACCEPT_OFFER
-
-            # Late phase: accept decent offers
-            if progress > 0.7:
-                if offer_utility > none_utility * 1.1:
-                    # print(f'{self.id} responds ACCEPT')
-                    return ResponseType.ACCEPT_OFFER
-        # print(f'{self.id} responds REJECT')
+            # Calculate utility of offer
+        best_outcome, best_utility = self._find_best_outcome(negotiator_id, dict_outcome_space)
+        offer_utility = self.pattern_outcomes[current_offer]
+        all_utilities = list(self.pattern_outcomes.values())
+        mean_utility = numpy.mean(all_utilities)
+        std_utility = numpy.std(all_utilities)
+        progress = self._get_progress(negotiator_id)
+        if progress < 0.4:
+            z = 2
+        elif progress < 0.7:
+            z = 1
+        else:
+            z = 0
+            
+        if offer_utility > (mean_utility + (z * std_utility)):
+            return ResponseType.ACCEPT_OFFER
         return ResponseType.REJECT_OFFER
 
     def _update_agreements_if_needed(self):
