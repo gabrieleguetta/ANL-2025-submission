@@ -16,24 +16,25 @@ def test_on_target_quant_scenario():
     print("\n===== Testing NewNegotiator as center agent =====")
 
     # Test against different edge agent combinations
-    # edge_combinations = [
-    #     [Boulware2025, Boulware2025, Boulware2025, Boulware2025],
-    #     [Linear2025, Linear2025, Linear2025, Linear2025],
-    #     [Random2025, Random2025, Random2025, Random2025],
-    #     [Boulware2025, Linear2025, Random2025, Linear2025]
-    # ]
+    edge_combinations = [
+        [Boulware2025, Boulware2025, Boulware2025, Boulware2025],
+        [Linear2025, Linear2025, Linear2025, Linear2025],
+        [Random2025, Random2025, Random2025, Random2025],
+        [NewNegotiator, NewNegotiator, NewNegotiator, NewNegotiator],
+        [Boulware2025, NewNegotiator, Random2025, Linear2025],
+    ]
 
-    # for i, edge_agents in enumerate(edge_combinations):
-    #     print(f"\nTest {i+1}: Against {[agent.__name__ for agent in edge_agents]}")
-    #     results = run_session(
-    #         scenario=scenario,
-    #         center_type=NewNegotiator,
-    #         edge_types=edge_agents,
-    #         nsteps=100,
-    #     )
-    #     print(f"Center utility: {results.center_utility}")
-    #     print(f"Edge Utilities: {results.edge_utilities}")
-    #     print(f"Agreements: {results.agreements}")
+    for i, edge_agents in enumerate(edge_combinations):
+        print(f"\nTest {i+1}: Against {[agent.__name__ for agent in edge_agents]}")
+        results = run_session(
+            scenario=scenario,
+            center_type=NewNegotiator,
+            edge_types=edge_agents,
+            nsteps=100,
+        )
+        print(f"Center utility: {results.center_utility}")
+        print(f"Edge Utilities: {results.edge_utilities}")
+        print(f"Agreements: {results.agreements}")
 
     print("\n===== Testing NewNegotiator as edge agent (all edges are NewNegotiator) =====")
 
