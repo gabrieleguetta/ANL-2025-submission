@@ -10,7 +10,7 @@ from myagent.itay_agent import NewNegotiator
 def test_on_target_quant_scenario():
     """Test the NewNegotiator on the target_quantity scenario."""
     # Load the dinners scenario
-    path = pathlib.Path("official_test_scenarios/TargetQuantity_example")
+    path = pathlib.Path("")
     scenario = MultidealScenario.from_folder(path)
 
     print("\n===== Testing NewNegotiator as center agent =====")
