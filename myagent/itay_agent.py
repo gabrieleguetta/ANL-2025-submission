@@ -1,0 +1,312 @@
+"""
+**Submitted to ANAC 2025 Automated Negotiation League**
+*Team* type your team name here
+*Authors* type your team member names with their emails here
+
+This code is free to use or update given that proper attribution is given to
+the authors and the ANAC 2025 ANL competition.
+"""
+import itertools
+from negmas.outcomes import Outcome
+import numpy
+from .helpers.helperfunctions import set_id_dict, did_negotiation_end, is_edge_agent, get_agreement_at_index
+import random
+
+from anl2025.negotiator import ANL2025Negotiator
+from anl2025.ufun import SideUFun, CenterUFun
+from negmas.sao.controllers import SAOController, SAOState
+from negmas import (
+    DiscreteCartesianOutcomeSpace,
+    ExtendedOutcome,
+    ResponseType, CategoricalIssue, 
+    SAONMI
+)
+
+class ItayNegotiator(ANL2025Negotiator):
+    """
+    Your agent code. This is the ONLY class you need to implement
+    This example agent aims for the absolute best bid available. As a center agent, it adapts its strategy after each negotiation, by aiming for the best bid GIVEN the previous outcomes.
+    """
+
+    """
+       The most general way to implement an agent is to implement propose and respond.
+       """
+
+    def init(self):
+        """Executed when the agent is created. In ANL2025, all agents are initialized before the tournament starts."""
+        #print("init")
+        self.agreements = []
+        #Initalize variables
+        self.current_neg_index = -1
+        self.target_bid = None
+        self.last_neg = ''
+        # Make a dictionary that maps the index of the negotiation to the negotiator id. The index of the negotiation is the order in which the negotiation happen in sequence.
+        self.id_dict = {}
+        set_id_dict(self)
+        self.agreements = []
+        self.best_pattern = None
+        self.best_utility = float('-inf')
+        self.num_negotiations = len(self.id_dict)
+        self.trace_by_neg = {}
+    
+    def _get_possible_outcomes(self, neg_id):
+        """Get all possible outcomes for a negotiation by id."""
+        nmi = self.negotiators[neg_id].negotiator.nmi
+        return list(nmi.outcome_space.enumerate_or_sample())
+
+    def _get_progress(self, negotiator_id):
+        """Get the current negotiation progress (0 to 1)."""
+        nmi = self.negotiators[negotiator_id].negotiator.nmi
+        return nmi.state.relative_time if nmi.state.relative_time is not None else 0
+    
+
+
+    def _find_best_outcome(self, negotiator_id, dict_outcome_space):
+        """Find the best outcome for the current negotiation."""
+        # For edge agents, find outcome with highest utility
+        '''
+                the leverage is calculated by the negotiation number.
+                Further along the way, the edge negotiator should hold more leverage. 
+
+        '''
+        self.leverage = 2 *( int(negotiator_id[-1]) + 1)
+        if is_edge_agent(self):
+            best_outcome = None
+            best_utility = float('-inf')
+            self.pattern_outcomes = {}
+            for outcome in self._get_possible_outcomes(negotiator_id):
+                try:
+                    i_rejected = dict_outcome_space[outcome][2]
+                    opp_rejected = dict_outcome_space[outcome][3]
+                except: 
+                  i_rejected = opp_rejected = 0
+                #   tuple(str(int(outcome[0]) + (0.1 * i_rejected) - (0.1 * opp_rejected)))
+                utility = (self.ufun(outcome)) + (0.001 * i_rejected) - ((0.05 / self.leverage) * opp_rejected)# * ((1/self.leverage))
+                self.pattern_outcomes[outcome] = utility
+                if utility > best_utility:
+                    best_outcome = outcome 
+                    best_utility = utility
+
+            return best_outcome, best_utility
+
+
+        context = list(self.agreements)
+        len_ctxt = len(context)
+        context += [None] #* (len(self.negotiators) - len(context))
+        self.pattern_outcomes = {}
+        best_outcome = None
+        best_utility = float('-inf')
+
+        # Try each possible outcome + furute theoretic outcomes.
+        for outcome in self._get_possible_outcomes(negotiator_id):
+            test_context = context.copy()
+            test_context[int(negotiator_id[1])] = outcome
+            # rest_combs = itertools.combinations(self._get_possible_outcomes(negotiator_id), len(self.negotiators.keys()) - (len_ctxt + 1))
+            
+            try:
+                i_rejected = dict_outcome_space[negotiator_id][outcome][2]
+                opp_rejected = dict_outcome_space[negotiator_id][outcome][3]
+            except: 
+                i_rejected = opp_rejected = 0
+            sum_utility = 0
+            num_utility = 0
+            combs_list = []
+            remaining = len(self.negotiators) - (len_ctxt + 1)
+            sampled_outcomes = self._get_possible_outcomes(negotiator_id)
+            SAMPLE_SIZE = 5
+            for _ in range(SAMPLE_SIZE):
+                fake_rest = random.choices(sampled_outcomes, k=remaining)
+                test_context_comb = test_context + fake_rest
+                utility = (self.ufun(tuple(test_context_comb))) + (0.001 * i_rejected) - (((0.05 * self.leverage) * opp_rejected))# * (1-(2 / self.leverage))
+                sum_utility += utility
+
+            avg_util = sum_utility / SAMPLE_SIZE
+            self.pattern_outcomes[outcome] = avg_util
+
+
+            # Calculate the average theoretic rest of negotiation utility for the outcome
+            # for c in rest_combs:
+            #     test_context_comb = test_context.copy() + list(c)
+            #     utility = ((8 / self.leverage) * self.ufun(tuple(test_context_comb))) + (0.001 * i_rejected) - ((0.01 * opp_rejected) * (1/self.leverage))
+            #     sum_utility += utility
+            #     num_utility += 1
+            # avg_util = sum_utility / num_utility
+            # self.pattern_outcomes[outcome] = avg_util
+
+            if avg_util > best_utility:
+                best_outcome = outcome
+                best_utility = avg_util
+
+        # Try having no agreement
+        test_context = context.copy()
+        test_context += [None for i in range(len(self.negotiators.keys()) - (len_ctxt + 1))]
+
+        none_utility = self.ufun(tuple(test_context))
+        
+        if none_utility > best_utility:
+            return None, 0
+        return best_outcome, best_utility
+
+
+
+    def propose(self, negotiator_id, state, dest=None):
+        if negotiator_id.startswith('s'):
+            pass
+        if negotiator_id != self.last_neg and self.last_neg != '':
+            self.agreements.append(self.last_proposal)
+        """Generate a proposal in the negotiation."""
+        # Check if negotiation has ended and update strategy
+        if did_negotiation_end(self):
+            self._update_agreements_if_needed()
+
+        self.cur_state = state
+        negotiator, cntxt = self.negotiators[negotiator_id]
+        nmi = negotiator.nmi
+        level = self._get_progress(negotiator_id)
+        ufun: SideUFun = cntxt["ufun"]
+        step = state.step
+        current_offer = state.current_offer
+        my_offers = []
+        oponnent_offers = []
+
+        # A dictionary that states for each outcome how many times it was proposed and rejected by each negotiator
+        dict_outcome_space = {}
+
+        if step != 0:
+            trace = nmi.extended_trace
+            opponent_rejected = {}
+            i_rejected = {}
+            for i in trace:
+                if i[1] == negotiator_id:
+                        my_offers.append(i[2])
+                        try:
+                            opponent_rejected[i[2]] += 1
+                        except:
+                            opponent_rejected[i[2]] = 1
+                else:
+                        oponnent_offers.append(i[2])
+                        try:
+                            i_rejected[i[2]] += 1
+                        except:
+                            i_rejected[i[2]] = 1
+            
+            
+
+                for i in nmi.outcome_space:
+                    if i not in i_rejected.keys():
+                        i_rejected[i] = 0
+                    if i not in opponent_rejected.keys():
+                        opponent_rejected[i] = 0
+                    dict_outcome_space[i] = [ufun(i), level, i_rejected[i], opponent_rejected[i]]
+        self.trace_by_neg[negotiator_id] = dict_outcome_space
+        if is_edge_agent(self):
+                best_outcome, best_utility = self._find_best_outcome(negotiator_id, self.trace_by_neg[negotiator_id])
+                # print(f'{self.id} proposed {best_outcome} to {dest}')
+                return best_outcome      
+        # Find best outcome
+        best_outcome, best_utility = self._find_best_outcome(negotiator_id, self.trace_by_neg)
+
+        # If best outcome is no agreement, end negotiation after early phase
+        if best_outcome is None:
+            progress = self._get_progress(negotiator_id)
+            if progress > 0.3:
+                return None
+        # print(f'{self.id} proposed {best_outcome} to {dest}')
+        self.last_proposal = best_outcome
+        self.last_neg = negotiator_id
+        return best_outcome
+
+    def respond(self, negotiator_id, state, source=None):
+        if negotiator_id.startswith('s'):
+            pass
+        """Respond to a proposal in the negotiation."""
+        # Check if negotiation has ended and update strategy
+        if did_negotiation_end(self):
+            self._update_agreements_if_needed()
+        
+        # If no offer, reject
+        self.cur_state = state
+        if state.current_offer is None:
+            # print(f'{self.id} responds REJECT')
+            return ResponseType.REJECT_OFFER
+        # print(f'{self.id} recieves {state.current_offer}')
+        negotiator, cntxt = self.negotiators[negotiator_id]
+        nmi = negotiator.nmi
+        level = self._get_progress(negotiator_id)
+        ufun: SideUFun = cntxt["ufun"]
+        step = state.step
+        current_offer = state.current_offer
+        my_offers = []
+        oponnent_offers = []
+        # Same dict as in propose
+        dict_outcome_space = {}
+
+        if step != 0:
+            trace = nmi.extended_trace
+            opponent_rejected = {}
+            i_rejected = {}
+            for i in trace:
+                if i[1] == negotiator_id:
+                        my_offers.append(i[2])
+                        try:
+                            opponent_rejected[i[2]] += 1
+                        except:
+                            opponent_rejected[i[2]] = 1
+                else:
+                        oponnent_offers.append(i[2])
+                        try:
+                            i_rejected[i[2]] += 1
+                        except:
+                            i_rejected[i[2]] = 1
+            
+            
+
+                for i in nmi.outcome_space:
+                    if i not in i_rejected.keys():
+                        i_rejected[i] = 0
+                    if i not in opponent_rejected.keys():
+                        opponent_rejected[i] = 0
+                    dict_outcome_space[i] = [ufun(i), level, i_rejected[i], opponent_rejected[i]]
+        self.trace_by_neg[negotiator_id] = dict_outcome_space
+
+        best_outcome, best_utility = self._find_best_outcome(negotiator_id, dict_outcome_space)
+        '''
+        Acceptance strategy:
+        1. in an early phase, only accept offers with utility higher than mean utility + 2 stds
+        2. in an advanced stage- mean + 1 std
+        3. in a late stage- only higher than mean 
+        '''
+        offer_utility = self.pattern_outcomes[current_offer]
+        all_utilities = list(self.pattern_outcomes.values())
+        mean_utility = numpy.mean(all_utilities)
+        progress = self._get_progress(negotiator_id)
+        agent_type_factor = 1 if is_edge_agent(self) else 2
+
+# Variance adjustment — higher std => lower z
+        std_utility = numpy.std(all_utilities)
+        std_utility = max(std_utility, 1e-5)  # avoid division by zero
+
+# Normalize std_utility against mean to make it scale-invariant
+        std_ratio = std_utility / (numpy.mean(all_utilities) + 1e-5)
+        base_z = 3 + 3 * (1 - ((3 * progress) * agent_type_factor) )
+
+# Final z: reduced further as variance increases (e.g., z ~ 1/std)
+        z = base_z / (1 +  5 * (std_ratio))  # 20 is a tuning hyperparameter
+        # z = max(-5, z)
+        if offer_utility > (mean_utility + (z * std_utility)):
+            return ResponseType.ACCEPT_OFFER
+        return ResponseType.REJECT_OFFER
+
+    def _update_agreements_if_needed(self):
+        """Update the agreements list if a negotiation has ended."""
+        if did_negotiation_end(self):
+            # Store the agreement from the just-ended negotiation
+            prev_index = self.current_neg_index - 1
+            if prev_index >= 0:
+                agreement = get_agreement_at_index(self, prev_index)
+                while len(self.agreements) <= prev_index:
+                    self.agreements.append(None)
+                self.agreements[prev_index] = agreement
+                return True
+        return False
+

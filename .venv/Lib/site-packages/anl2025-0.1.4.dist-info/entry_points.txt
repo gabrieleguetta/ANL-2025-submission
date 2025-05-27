@@ -1,0 +1,2 @@
+[console_scripts]
+anl2025 = anl2025.cli:app
