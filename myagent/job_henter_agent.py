@@ -95,7 +95,7 @@ class JobHunterNegotiator(ANL2025Negotiator):
             self._update_strategy()
         
         # Keep track of the opponent behaviour
-        self.opponent_selections.append(self.get_offer_util_idx(state.current_offer))
+        #self.opponent_selections.append(self.get_offer_util_idx(state.current_offer))
 
         # This agent is very stubborn: it only accepts an offer if it is EXACTLY the target bid it wants to have.
         #if state.current_offer is get_target_bid_at_current_index(self):
