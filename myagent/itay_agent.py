@@ -9,8 +9,8 @@ the authors and the ANAC 2025 ANL competition.
 import itertools
 from negmas.outcomes import Outcome
 import numpy
-from helpers.helperfunctions import set_id_dict, did_negotiation_end, is_edge_agent, get_agreement_at_index
-
+from .helpers.helperfunctions import set_id_dict, did_negotiation_end, is_edge_agent, get_agreement_at_index
+import random
 
 from anl2025.negotiator import ANL2025Negotiator
 from anl2025.ufun import SideUFun, CenterUFun
@@ -22,7 +22,7 @@ from negmas import (
     SAONMI
 )
 
-class NewNegotiator(ANL2025Negotiator):
+class ItayNegotiator(ANL2025Negotiator):
     """
     Your agent code. This is the ONLY class you need to implement
     This example agent aims for the absolute best bid available. As a center agent, it adapts its strategy after each negotiation, by aiming for the best bid GIVEN the previous outcomes.
@@ -81,7 +81,7 @@ class NewNegotiator(ANL2025Negotiator):
                 except: 
                   i_rejected = opp_rejected = 0
                 #   tuple(str(int(outcome[0]) + (0.1 * i_rejected) - (0.1 * opp_rejected)))
-                utility = ((6 / self.leverage) * (self.ufun(outcome))) + (0.0005 * i_rejected) - (0.001 * opp_rejected * (1/self.leverage))
+                utility = (self.ufun(outcome)) + (0.001 * i_rejected) - ((0.02 / self.leverage) * opp_rejected)# * ((1/self.leverage))
                 self.pattern_outcomes[outcome] = utility
                 if utility > best_utility:
                     best_outcome = outcome 
@@ -101,7 +101,8 @@ class NewNegotiator(ANL2025Negotiator):
         for outcome in self._get_possible_outcomes(negotiator_id):
             test_context = context.copy()
             test_context[int(negotiator_id[1])] = outcome
-            rest_combs = itertools.combinations(self._get_possible_outcomes(negotiator_id), len(self.negotiators.keys()) - (len_ctxt + 1))
+            # rest_combs = itertools.combinations(self._get_possible_outcomes(negotiator_id), len(self.negotiators.keys()) - (len_ctxt + 1))
+            
             try:
                 i_rejected = dict_outcome_space[negotiator_id][outcome][2]
                 opp_rejected = dict_outcome_space[negotiator_id][outcome][3]
@@ -110,14 +111,27 @@ class NewNegotiator(ANL2025Negotiator):
             sum_utility = 0
             num_utility = 0
             combs_list = []
-            # Calculate the average theoretic rest of negotiation utility for the outcome
-            for c in rest_combs:
-                test_context_comb = test_context.copy() + list(c)
-                utility = ((8 / self.leverage) * self.ufun(tuple(test_context_comb))) + (0.001 * i_rejected) - ((0.01 * opp_rejected) * (3/self.leverage))
+            remaining = len(self.negotiators) - (len_ctxt + 1)
+            sampled_outcomes = self._get_possible_outcomes(negotiator_id)
+            SAMPLE_SIZE = 5
+            for _ in range(SAMPLE_SIZE):
+                fake_rest = random.choices(sampled_outcomes, k=remaining)
+                test_context_comb = test_context + fake_rest
+                utility = (self.ufun(tuple(test_context_comb))) + (0.001 * i_rejected) - (((0.012 * self.leverage) * opp_rejected))# * (1-(2 / self.leverage))
                 sum_utility += utility
-                num_utility += 1
-            avg_util = sum_utility / num_utility
+
+            avg_util = sum_utility / SAMPLE_SIZE
             self.pattern_outcomes[outcome] = avg_util
+
+
+            # Calculate the average theoretic rest of negotiation utility for the outcome
+            # for c in rest_combs:
+            #     test_context_comb = test_context.copy() + list(c)
+            #     utility = ((8 / self.leverage) * self.ufun(tuple(test_context_comb))) + (0.001 * i_rejected) - ((0.01 * opp_rejected) * (1/self.leverage))
+            #     sum_utility += utility
+            #     num_utility += 1
+            # avg_util = sum_utility / num_utility
+            # self.pattern_outcomes[outcome] = avg_util
 
             if avg_util > best_utility:
                 best_outcome = outcome
@@ -265,15 +279,20 @@ class NewNegotiator(ANL2025Negotiator):
         offer_utility = self.pattern_outcomes[current_offer]
         all_utilities = list(self.pattern_outcomes.values())
         mean_utility = numpy.mean(all_utilities)
-        std_utility = numpy.std(all_utilities)
         progress = self._get_progress(negotiator_id)
-        if progress < 0.4:
-            z = 2
-        elif progress < 0.7:
-            z = 1
-        else:
-            z = 0
-            
+        agent_type_factor = 1 if is_edge_agent(self) else 1.2
+
+# Variance adjustment — higher std => lower z
+        std_utility = numpy.std(all_utilities)
+        std_utility = max(std_utility, 1e-5)  # avoid division by zero
+
+# Normalize std_utility against mean to make it scale-invariant
+        std_ratio = std_utility / (numpy.mean(all_utilities) + 1e-5)
+        base_z = 3 + 3 * (1 - ((1.5 * progress) * agent_type_factor) )
+
+# Final z: reduced further as variance increases (e.g., z ~ 1/std)
+        z = base_z / (1 +  5 * (std_ratio))  # 20 is a tuning hyperparameter
+        # z = max(-5, z)
         if offer_utility > (mean_utility + (z * std_utility)):
             return ResponseType.ACCEPT_OFFER
         return ResponseType.REJECT_OFFER
@@ -291,12 +310,3 @@ class NewNegotiator(ANL2025Negotiator):
                 return True
         return False
 
-
-# if you want to do a very small test, use the parameter small=True here. Otherwise, you can use the default parameters.
-if __name__ == "__main__":
-    from helpers.runner import run_a_tournament
-
-    # Be careful here. When running directly from this file, relative imports give an error, e.g. import .helpers.helpfunctions.
-    # Change relative imports (i.e. starting with a .) at the top of the file. However, one should use relative imports when submitting the agent!
-
-    run_a_tournament(NewNegotiator, small=True)
