@@ -1,0 +1,57 @@
+name: RealEstateInvestor
+type: anl2025.ufun.LambdaCenterUFun
+reserved_value: 0.0
+n_edges: 4
+outcome_spaces:
+  - type: DiscreteCartesianOutcomeSpace
+    name: ResidentialSeller
+    issues:
+    - type: DiscreteCardinalIssue
+      name: PropertyValue
+      values: [200000, 300000, 400000, 500000, 600000]
+    - type: CategoricalIssue
+      name: Location
+      values: ['poor', 'average', 'good', 'prime']
+    - type: CategoricalIssue
+      name: Condition
+      values: ['needs_work', 'good', 'excellent']
+  - type: DiscreteCartesianOutcomeSpace
+    name: CommercialSeller
+    issues:
+    - type: DiscreteCardinalIssue
+      name: PropertyValue
+      values: [400000, 600000, 800000, 1000000, 1200000]
+    - type: CategoricalIssue
+      name: Location
+      values: ['poor', 'average', 'good', 'prime']
+    - type: CategoricalIssue
+      name: Condition
+      values: ['needs_work', 'good', 'excellent']
+  - type: DiscreteCartesianOutcomeSpace
+    name: IndustrialSeller
+    issues:
+    - type: DiscreteCardinalIssue
+      name: PropertyValue
+      values: [300000, 500000, 700000, 900000, 1100000]
+    - type: CategoricalIssue
+      name: Location
+      values: ['poor', 'average', 'good', 'prime']
+    - type: CategoricalIssue
+      name: Condition
+      values: ['needs_work', 'good', 'excellent']
+  - type: DiscreteCartesianOutcomeSpace
+    name: LandSeller
+    issues:
+    - type: DiscreteCardinalIssue
+      name: PropertyValue
+      values: [100000, 200000, 300000, 400000, 500000]
+    - type: CategoricalIssue
+      name: Location
+      values: ['poor', 'average', 'good', 'prime']
+    - type: CategoricalIssue
+      name: Development
+      values: ['raw', 'zoned', 'permitted']
+evaluator:
+  type: real_estate_center.RealEstateEvaluator
+  reserved_value: 0.0
+  target_portfolio_value: 2000000
