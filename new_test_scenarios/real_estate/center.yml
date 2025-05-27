@@ -4,7 +4,7 @@ reserved_value: 0.0
 n_edges: 4
 outcome_spaces:
   - type: DiscreteCartesianOutcomeSpace
-    name: ResidentialSeller
+    name: ResidentialProperty
     issues:
     - type: DiscreteCardinalIssue
       name: PropertyValue
@@ -16,7 +16,7 @@ outcome_spaces:
       name: Condition
       values: ['needs_work', 'good', 'excellent']
   - type: DiscreteCartesianOutcomeSpace
-    name: CommercialSeller
+    name: CommercialProperty
     issues:
     - type: DiscreteCardinalIssue
       name: PropertyValue
@@ -28,7 +28,7 @@ outcome_spaces:
       name: Condition
       values: ['needs_work', 'good', 'excellent']
   - type: DiscreteCartesianOutcomeSpace
-    name: IndustrialSeller
+    name: IndustrialProperty
     issues:
     - type: DiscreteCardinalIssue
       name: PropertyValue
@@ -40,7 +40,7 @@ outcome_spaces:
       name: Condition
       values: ['needs_work', 'good', 'excellent']
   - type: DiscreteCartesianOutcomeSpace
-    name: LandSeller
+    name: LandProperty
     issues:
     - type: DiscreteCardinalIssue
       name: PropertyValue
@@ -54,4 +54,3 @@ outcome_spaces:
 evaluator:
   type: real_estate_center.RealEstateEvaluator
   reserved_value: 0.0
-  target_portfolio_value: 2000000

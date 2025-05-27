@@ -1,0 +1,27 @@
+name: PackagingSupplier
+reserved_value: 0.05
+type: LinearAdditiveUtilityFunction
+values:
+- type: TableFun
+  mapping:
+    500: 0.2
+    750: 0.4
+    1000: 0.6
+    1250: 0.8
+    1500: 1.0
+- type: TableFun
+  mapping:
+    'standard': 0.4
+    'premium': 0.7
+    'ultra': 1.0
+- type: TableFun
+  mapping:
+    300: 0.2
+    400: 0.4
+    500: 0.6
+    600: 0.8
+    700: 1.0
+weights:
+- 0.4  # Quantity weight
+- 0.1  # Quality weight
+- 0.5  # Price weight

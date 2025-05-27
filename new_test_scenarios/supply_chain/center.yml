@@ -54,7 +54,3 @@ outcome_spaces:
 evaluator:
   type: supply_chain_center.SupplyChainEvaluator
   reserved_value: 0.0
-  target_steel: 200
-  target_electronics: 80
-  target_packaging: 1000
-  budget_limit: 12000

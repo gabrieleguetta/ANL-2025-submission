@@ -1,0 +1,26 @@
+name: CommercialSeller
+reserved_value: 0.15
+type: LinearAdditiveUtilityFunction
+values:
+- type: TableFun
+  mapping:
+    400000: 0.2
+    600000: 0.4
+    800000: 0.6
+    1000000: 0.8
+    1200000: 1.0
+- type: TableFun
+  mapping:
+    'poor': 0.2
+    'average': 0.4
+    'good': 0.7
+    'prime': 1.0
+- type: TableFun
+  mapping:
+    'needs_work': 0.3
+    'good': 0.6
+    'excellent': 1.0
+weights:
+- 0.7  # Property value weight
+- 0.2  # Location weight
+- 0.1  # Condition weight

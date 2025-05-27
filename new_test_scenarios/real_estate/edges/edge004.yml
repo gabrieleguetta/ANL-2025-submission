@@ -1,0 +1,26 @@
+name: LandSeller
+reserved_value: 0.08
+type: LinearAdditiveUtilityFunction
+values:
+- type: TableFun
+  mapping:
+    100000: 0.2
+    200000: 0.4
+    300000: 0.6
+    400000: 0.8
+    500000: 1.0
+- type: TableFun
+  mapping:
+    'poor': 0.3
+    'average': 0.5
+    'good': 0.8
+    'prime': 1.0
+- type: TableFun
+  mapping:
+    'raw': 0.4
+    'zoned': 0.7
+    'permitted': 1.0
+weights:
+- 0.5  # Property value weight
+- 0.3  # Location weight
+- 0.2  # Development status weight

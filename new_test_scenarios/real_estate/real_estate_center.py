@@ -48,7 +48,7 @@ class RealEstateEvaluator:
                 property_values.append(0)
                 continue
 
-            if len(agreement) == 3:  # Regular properties
+            if i < 3:  # Regular properties (residential, commercial, industrial)
                 value, location, condition = agreement
                 adjusted_value = (value *
                                   self.location_multipliers[location] *

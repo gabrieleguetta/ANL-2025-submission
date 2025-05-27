@@ -1,0 +1,19 @@
+name: DataScientist
+reserved_value: 0.15
+type: LinearAdditiveUtilityFunction
+values:
+- type: TableFun
+  mapping:
+    60000: 0.2
+    70000: 0.4
+    80000: 0.6
+    90000: 0.8
+    100000: 1.0
+- type: TableFun
+  mapping:
+    'junior': 0.3
+    'senior': 0.7
+    'lead': 1.0
+weights:
+- 0.7  # Salary weight
+- 0.3  # Role weight
