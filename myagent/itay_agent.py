@@ -81,7 +81,7 @@ class ItayNegotiator(ANL2025Negotiator):
                 except: 
                   i_rejected = opp_rejected = 0
                 #   tuple(str(int(outcome[0]) + (0.1 * i_rejected) - (0.1 * opp_rejected)))
-                utility = (self.ufun(outcome)) + (0.001 * i_rejected) - ((0.02 / self.leverage) * opp_rejected)# * ((1/self.leverage))
+                utility = (self.ufun(outcome)) + (0.001 * i_rejected) - ((0.05 / self.leverage) * opp_rejected)# * ((1/self.leverage))
                 self.pattern_outcomes[outcome] = utility
                 if utility > best_utility:
                     best_outcome = outcome 
@@ -117,7 +117,7 @@ class ItayNegotiator(ANL2025Negotiator):
             for _ in range(SAMPLE_SIZE):
                 fake_rest = random.choices(sampled_outcomes, k=remaining)
                 test_context_comb = test_context + fake_rest
-                utility = (self.ufun(tuple(test_context_comb))) + (0.001 * i_rejected) - (((0.012 * self.leverage) * opp_rejected))# * (1-(2 / self.leverage))
+                utility = (self.ufun(tuple(test_context_comb))) + (0.001 * i_rejected) - (((0.05 * self.leverage) * opp_rejected))# * (1-(2 / self.leverage))
                 sum_utility += utility
 
             avg_util = sum_utility / SAMPLE_SIZE
@@ -280,7 +280,7 @@ class ItayNegotiator(ANL2025Negotiator):
         all_utilities = list(self.pattern_outcomes.values())
         mean_utility = numpy.mean(all_utilities)
         progress = self._get_progress(negotiator_id)
-        agent_type_factor = 1 if is_edge_agent(self) else 1.2
+        agent_type_factor = 1 if is_edge_agent(self) else 2
 
 # Variance adjustment — higher std => lower z
         std_utility = numpy.std(all_utilities)
@@ -288,7 +288,7 @@ class ItayNegotiator(ANL2025Negotiator):
 
 # Normalize std_utility against mean to make it scale-invariant
         std_ratio = std_utility / (numpy.mean(all_utilities) + 1e-5)
-        base_z = 3 + 3 * (1 - ((1.5 * progress) * agent_type_factor) )
+        base_z = 3 + 3 * (1 - ((3 * progress) * agent_type_factor) )
 
 # Final z: reduced further as variance increases (e.g., z ~ 1/std)
         z = base_z / (1 +  5 * (std_ratio))  # 20 is a tuning hyperparameter
