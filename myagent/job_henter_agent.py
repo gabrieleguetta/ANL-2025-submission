@@ -14,8 +14,7 @@ from .helpers.helperfunctions import set_id_dict, did_negotiation_end, get_targe
     get_current_negotiation_index, get_agreement_at_index
 #be careful: When running directly from this file, change the relative import to an absolute import. When submitting, use relative imports.
 #from helpers.helperfunctions import set_id_dict, ...
-
-from anl2025.ufun import SideUFun
+from anl2025.ufun import SideUFun, MaxCenterUFun
 from anl2025.negotiator import ANL2025Negotiator
 from negmas.sao.controllers import SAOController, SAOState
 from negmas import (
@@ -142,7 +141,7 @@ class JobHunterNegotiator(ANL2025Negotiator):
 
             self.calc_cur_util()
             best_bid = self.find_best_bid()
-            
+        
         self.target_bid = best_bid
         #print(self.target_bid)
 
