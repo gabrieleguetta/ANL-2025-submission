@@ -1,0 +1,36 @@
+name: ResearchDirector
+type: anl2025.ufun.LambdaCenterUFun
+reserved_value: 0.0
+n_edges: 3
+outcome_spaces:
+  - type: DiscreteCartesianOutcomeSpace
+    name: DataScientistNegotiation
+    issues:
+    - type: DiscreteCardinalIssue
+      name: Salary
+      values: [60000, 70000, 80000, 90000, 100000]
+    - type: CategoricalIssue
+      name: Role
+      values: ['junior', 'senior', 'lead']
+  - type: DiscreteCartesianOutcomeSpace
+    name: EngineerNegotiation
+    issues:
+    - type: DiscreteCardinalIssue
+      name: Salary
+      values: [65000, 75000, 85000, 95000, 105000]
+    - type: CategoricalIssue
+      name: Role
+      values: ['junior', 'senior', 'lead']
+  - type: DiscreteCartesianOutcomeSpace
+    name: StatisticianNegotiation
+    issues:
+    - type: DiscreteCardinalIssue
+      name: Salary
+      values: [55000, 65000, 75000, 85000, 95000]
+    - type: CategoricalIssue
+      name: Role
+      values: ['junior', 'senior', 'lead']
+evaluator:
+  type: research_team_center.ResearchTeamEvaluator
+  reserved_value: 0.0
+  budget_limit: 250000

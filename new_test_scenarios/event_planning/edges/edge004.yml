@@ -1,0 +1,19 @@
+name: Band
+reserved_value: 0.1
+type: LinearAdditiveUtilityFunction
+values:
+- type: TableFun
+  mapping:
+    3000: 0.2
+    4000: 0.4
+    5000: 0.6
+    6000: 0.8
+    8000: 1.0
+- type: TableFun
+  mapping:
+    'basic': 0.3
+    'premium': 0.6
+    'luxury': 1.0
+weights:
+- 0.8  # Budget weight
+- 0.2  # Service level weight

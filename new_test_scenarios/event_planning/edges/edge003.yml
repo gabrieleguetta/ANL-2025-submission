@@ -1,0 +1,19 @@
+name: Venue
+reserved_value: 0.2
+type: LinearAdditiveUtilityFunction
+values:
+- type: TableFun
+  mapping:
+    8000: 0.2
+    10000: 0.4
+    12000: 0.6
+    15000: 0.8
+    20000: 1.0
+- type: TableFun
+  mapping:
+    'basic': 0.4
+    'premium': 0.7
+    'luxury': 1.0
+weights:
+- 0.6  # Budget weight
+- 0.4  # Service level weight
