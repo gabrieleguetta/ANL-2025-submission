@@ -6,11 +6,9 @@ values:
 - type: TableFun
   mapping:
     50: 1.0   # Low resolution rate is easier
-    60: 0.8
     70: 0.6
     80: 0.4
     90: 0.2
-    95: 0.1
     100: 0.0  # Perfect resolution rate is very difficult
 - type: TableFun
   mapping:

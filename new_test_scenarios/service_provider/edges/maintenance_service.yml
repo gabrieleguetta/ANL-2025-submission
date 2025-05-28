@@ -8,7 +8,6 @@ values:
     85: 1.0   # Lower uptime is easier to achieve
     90: 0.7
     95: 0.5
-    97: 0.3
     99: 0.1
     100: 0.0  # Perfect uptime is extremely difficult
 - type: TableFun
