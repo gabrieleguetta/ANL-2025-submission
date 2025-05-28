@@ -7,39 +7,72 @@ outcome_spaces:
   - type: DiscreteCartesianOutcomeSpace
     name: TeamAResearch
     issues:
-    - type: ContiguousIssue
+    - type: CategoricalIssue
       name: research_quality
       values:
-      - 1
-      - 10
-    - type: ContiguousIssue
+      - 'q1'
+      - 'q2'
+      - 'q3'
+      - 'q4'
+      - 'q5'
+      - 'q6'
+      - 'q7'
+      - 'q8'
+      - 'q9'
+      - 'q10'
+    - type: CategoricalIssue
       name: innovation_level
       values:
-      - 1
-      - 5
+      - 'i1'
+      - 'i2'
+      - 'i3'
+      - 'i4'
+      - 'i5'
   - type: DiscreteCartesianOutcomeSpace
     name: TeamBResearch
     issues:
-    - type: ContiguousIssue
+    - type: CategoricalIssue
       name: research_quality
       values:
-      - 1
-      - 10
-    - type: ContiguousIssue
+      - 'q1'
+      - 'q2'
+      - 'q3'
+      - 'q4'
+      - 'q5'
+      - 'q6'
+      - 'q7'
+      - 'q8'
+      - 'q9'
+      - 'q10'
+    - type: CategoricalIssue
       name: innovation_level
       values:
-      - 1
-      - 5
+      - 'i1'
+      - 'i2'
+      - 'i3'
+      - 'i4'
+      - 'i5'
   - type: DiscreteCartesianOutcomeSpace
     name: TeamCResearch
     issues:
-    - type: ContiguousIssue
+    - type: CategoricalIssue
       name: research_quality
       values:
-      - 1
-      - 10
-    - type: ContiguousIssue
+      - 'q1'
+      - 'q2'
+      - 'q3'
+      - 'q4'
+      - 'q5'
+      - 'q6'
+      - 'q7'
+      - 'q8'
+      - 'q9'
+      - 'q10'
+    - type: CategoricalIssue
       name: innovation_level
       values:
-      - 1
-      - 5
+      - 'i1'
+      - 'i2'
+      - 'i3'
+      - 'i4'
+      - 'i5'

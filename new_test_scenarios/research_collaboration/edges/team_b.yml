@@ -5,23 +5,23 @@ type: LinearAdditiveUtilityFunction
 values:
 - type: TableFun
   mapping:
-    1: 0.0
-    2: 0.2
-    3: 0.3
-    4: 0.4
-    5: 0.6
-    6: 0.7
-    7: 0.8
-    8: 0.9
-    9: 0.95
-    10: 1.0
+    'q1': 0.0
+    'q2': 0.2
+    'q3': 0.3
+    'q4': 0.4
+    'q5': 0.6
+    'q6': 0.7
+    'q7': 0.8
+    'q8': 0.9
+    'q9': 0.95
+    'q10': 1.0
 - type: TableFun
   mapping:
-    1: 0.1
-    2: 0.3
-    3: 0.6
-    4: 0.8
-    5: 1.0
+    'i1': 0.1
+    'i2': 0.3
+    'i3': 0.6
+    'i4': 0.8
+    'i5': 1.0
 weights:
 - 0.7  # Quality importance
 - 0.3  # Innovation importance
