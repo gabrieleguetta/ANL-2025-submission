@@ -1,0 +1,114 @@
+# scenarios/linear_combination_procurement/center.yml
+name: ProcurementManager
+type: anl2025.ufun.LinearCombinationCenterUFun
+reserved_value: 0.0
+n_edges: 4
+side_ufuns:
+  - name: critical_supplier
+    reserved_value: 0.0
+    type: LinearAdditiveUtilityFunction
+    values:
+    - type: TableFun
+      mapping:
+        100: 0.2
+        150: 0.4
+        200: 0.7
+        250: 0.9
+        300: 1.0
+    - type: TableFun
+      mapping:
+        1: 0.3
+        2: 0.6
+        3: 0.8
+        4: 1.0
+        5: 0.9
+    weights:
+    - 0.6  # Price importance
+    - 0.4  # Quality importance
+  - name: secondary_supplier
+    reserved_value: 0.0
+    type: LinearAdditiveUtilityFunction
+    values:
+    - type: TableFun
+      mapping:
+        100: 0.1
+        150: 0.3
+        200: 0.6
+        250: 0.8
+        300: 1.0
+    - type: TableFun
+      mapping:
+        1: 0.2
+        2: 0.5
+        3: 0.7
+        4: 0.9
+        5: 1.0
+    weights:
+    - 0.7  # Price importance
+    - 0.3  # Quality importance
+  - name: backup_supplier
+    reserved_value: 0.0
+    type: LinearAdditiveUtilityFunction
+    values:
+    - type: TableFun
+      mapping:
+        100: 0.0
+        150: 0.2
+        200: 0.5
+        250: 0.7
+        300: 1.0
+    - type: TableFun
+      mapping:
+        1: 0.1
+        2: 0.4
+        3: 0.6
+        4: 0.8
+        5: 1.0
+    weights:
+    - 0.8  # Price importance
+    - 0.2  # Quality importance
+  - name: niche_supplier
+    reserved_value: 0.0
+    type: LinearAdditiveUtilityFunction
+    values:
+    - type: TableFun
+      mapping:
+        100: 0.3
+        150: 0.5
+        200: 0.6
+        250: 0.8
+        300: 1.0
+    - type: TableFun
+      mapping:
+        1: 0.4
+        2: 0.7
+        3: 0.9
+        4: 1.0
+        5: 0.8
+    weights:
+    - 0.5  # Price importance
+    - 0.5  # Quality importance
+weights:
+  - 0.4  # Critical supplier weight
+  - 0.3  # Secondary supplier weight
+  - 0.2  # Backup supplier weight
+  - 0.1  # Niche supplier weight
+outcome_space:
+  issues:
+  - n_values: 5
+    name: price
+    type: negmas.outcomes.cardinal_issue.DiscreteCardinalIssue
+    values:
+    - 100
+    - 150
+    - 200
+    - 250
+    - 300
+  - n_values: 5
+    name: quality_level
+    type: negmas.outcomes.contiguous_issue.ContiguousIssue
+    values:
+    - 1
+    - 5
+  name: ProcurementNegotiation
+  type: negmas.outcomes.outcome_space.DiscreteCartesianOutcomeSpace

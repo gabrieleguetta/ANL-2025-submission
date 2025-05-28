@@ -1,0 +1,22 @@
+# scenarios/linear_combination_procurement/edges/backup_supplier.yml
+name: BackupSupplier
+reserved_value: 0.1
+type: LinearAdditiveUtilityFunction
+values:
+- type: TableFun
+  mapping:
+    100: 0.0
+    150: 0.4
+    200: 0.7
+    250: 0.9
+    300: 1.0
+- type: TableFun
+  mapping:
+    1: 1.0
+    2: 0.6
+    3: 0.4
+    4: 0.2
+    5: 0.0
+weights:
+- 0.9  # Revenue importance
+- 0.1  # Cost efficiency importance

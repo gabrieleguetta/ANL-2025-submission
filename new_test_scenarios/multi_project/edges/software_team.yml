@@ -1,0 +1,30 @@
+# scenarios/multi_project/edges/software_team.yml
+name: SoftwareDevelopmentTeam
+reserved_value: 0.2
+type: LinearAdditiveUtilityFunction
+values:
+- type: TableFun
+  mapping:
+    6: 0.2   # 6 months is tight for development
+    9: 0.6   # 9 months is reasonable
+    12: 0.8  # 12 months is comfortable
+    18: 0.9  # 18 months is very comfortable
+    24: 1.0  # 24 months is plenty of time
+- type: TableFun
+  mapping:
+    50000: 0.0   # Too low budget for quality work
+    100000: 0.4
+    200000: 0.7
+    300000: 0.9
+    500000: 1.0  # Generous budget allows best work
+- type: TableFun
+  mapping:
+    5: 0.6   # Small team, more work per person
+    8: 0.8   # Good team size
+    12: 1.0  # Ideal team size for complex projects
+    15: 0.8  # Getting a bit large
+    20: 0.5  # Too many people, coordination issues
+weights:
+- 0.3  # Timeline pressure
+- 0.4  # Budget adequacy
+- 0.3  # Team size preferences
