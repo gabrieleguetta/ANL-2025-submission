@@ -1,22 +1,21 @@
-# scenarios/service_provider/edges/maintenance_service.yml
 name: MaintenanceTeam
 reserved_value: 0.25
 type: LinearAdditiveUtilityFunction
 values:
 - type: TableFun
   mapping:
-    85: 1.0   # Lower uptime is easier to achieve
-    90: 0.7
-    95: 0.5
-    99: 0.1
-    100: 0.0  # Perfect uptime is extremely difficult
+    '85': 1.0
+    '90': 0.7
+    '95': 0.5
+    '99': 0.1
+    '100': 0.0
 - type: TableFun
   mapping:
-    1: 1.0   # Low cost efficiency is easier
-    2: 0.7
-    3: 0.5
-    4: 0.2
-    5: 0.0   # High cost efficiency is challenging
+    '1': 1.0
+    '2': 0.7
+    '3': 0.5
+    '4': 0.2
+    '5': 0.0
 weights:
-- 0.8  # Uptime importance
-- 0.2  # Cost efficiency importance
+- 0.8
+- 0.2

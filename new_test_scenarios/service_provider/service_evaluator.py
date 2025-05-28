@@ -12,6 +12,10 @@ class ServiceQualityEvaluator:
             return self.reserved_value
 
         response_time, satisfaction = outcome
+        # Convert string values to integers for calculation
+        response_time = int(response_time)
+        satisfaction = int(satisfaction)
+
         # Better service = lower response time + higher satisfaction
         time_score = max(0, (60 - response_time) / 60)  # Normalize response time (lower is better)
         satisfaction_score = satisfaction / 10  # Normalize satisfaction (higher is better)
@@ -30,6 +34,10 @@ class TechnicalSupportEvaluator:
             return self.reserved_value
 
         resolution_rate, expertise_level = outcome
+        # Convert string values to integers for calculation
+        resolution_rate = int(resolution_rate)
+        expertise_level = int(expertise_level)
+
         # Higher resolution rate and expertise level = better utility
         return 0.7 * (resolution_rate / 100) + 0.3 * (expertise_level / 5)
 
@@ -46,6 +54,10 @@ class MaintenanceEvaluator:
             return self.reserved_value
 
         uptime_percentage, cost_efficiency = outcome
+        # Convert string values to integers for calculation
+        uptime_percentage = int(uptime_percentage)
+        cost_efficiency = int(cost_efficiency)
+
         # Higher uptime and cost efficiency = better utility
         return 0.8 * (uptime_percentage / 100) + 0.2 * (cost_efficiency / 5)
 
@@ -79,15 +91,24 @@ class GlobalServiceEvaluator:
 
             if i == 0:  # Customer Service
                 response_time, satisfaction = agreement
+                # Convert string values to integers
+                response_time = int(response_time)
+                satisfaction = int(satisfaction)
                 time_score = max(0, (60 - response_time) / 60)
                 satisfaction_score = satisfaction / 10
                 service_quality = 0.6 * time_score + 0.4 * satisfaction_score
-            elif i == 1:  # Technical Support
-                resolution_rate, expertise_level = agreement
-                service_quality = 0.7 * (resolution_rate / 100) + 0.3 * (expertise_level / 5)
-            elif i == 2:  # Maintenance
+            elif i == 1:  # Maintenance (now at index 1)
                 uptime_percentage, cost_efficiency = agreement
+                # Convert string values to integers
+                uptime_percentage = int(uptime_percentage)
+                cost_efficiency = int(cost_efficiency)
                 service_quality = 0.8 * (uptime_percentage / 100) + 0.2 * (cost_efficiency / 5)
+            elif i == 2:  # Technical Support (now at index 2)
+                resolution_rate, expertise_level = agreement
+                # Convert string values to integers
+                resolution_rate = int(resolution_rate)
+                expertise_level = int(expertise_level)
+                service_quality = 0.7 * (resolution_rate / 100) + 0.3 * (expertise_level / 5)
             else:
                 service_quality = 0.5  # Default for unknown services
 
