@@ -1,0 +1,65 @@
+# scenarios/supply_chain_flat/center.yml
+name: SupplyChainManager
+type: anl2025.ufun.FlatCenterUFun
+reserved_value: 0.0
+base_ufun:
+  type: anl2025.ufun.LambdaCenterUFun
+  n_edges: 3
+  outcome_spaces:
+    - type: DiscreteCartesianOutcomeSpace
+      name: Supplier1
+      issues:
+      - type: ContiguousIssue
+        name: delivery_days
+        values:
+        - 1
+        - 30
+      - type: ContiguousIssue
+        name: quality_rating
+        values:
+        - 1
+        - 5
+      - type: ContiguousIssue
+        name: cost_per_unit
+        values:
+        - 100
+        - 1000
+    - type: DiscreteCartesianOutcomeSpace
+      name: Supplier2
+      issues:
+      - type: ContiguousIssue
+        name: delivery_days
+        values:
+        - 1
+        - 30
+      - type: ContiguousIssue
+        name: quality_rating
+        values:
+        - 1
+        - 5
+      - type: ContiguousIssue
+        name: cost_per_unit
+        values:
+        - 100
+        - 1000
+    - type: DiscreteCartesianOutcomeSpace
+      name: Supplier3
+      issues:
+      - type: ContiguousIssue
+        name: delivery_days
+        values:
+        - 1
+        - 30
+      - type: ContiguousIssue
+        name: quality_rating
+        values:
+        - 1
+        - 5
+      - type: ContiguousIssue
+        name: cost_per_unit
+        values:
+        - 100
+        - 1000
+  evaluator:
+    type: flat_evaluator.create_base_center_ufun
+nissues: [3, 3, 3]  # Number of issues per edge

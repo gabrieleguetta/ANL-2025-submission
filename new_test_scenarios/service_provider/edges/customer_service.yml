@@ -1,0 +1,26 @@
+# scenarios/service_provider/edges/customer_service.yml
+name: CustomerServiceTeam
+reserved_value: 0.3
+type: LinearAdditiveUtilityFunction
+values:
+- type: TableFun
+  mapping:
+    5: 0.0   # Very fast response is costly
+    10: 0.2
+    15: 0.4
+    20: 0.6
+    30: 0.8
+    45: 0.9
+    60: 1.0  # Slower response is easier/cheaper
+- type: TableFun
+  mapping:
+    1: 1.0   # Low satisfaction is easy to achieve
+    3: 0.8
+    5: 0.6
+    7: 0.4
+    8: 0.2
+    9: 0.1
+    10: 0.0  # High satisfaction is difficult/costly
+weights:
+- 0.6  # Response time importance
+- 0.4  # Satisfaction difficulty importance

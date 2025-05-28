@@ -1,0 +1,27 @@
+# scenarios/research_collaboration/edges/team_c.yml
+name: ResearchTeamC
+reserved_value: 0.25
+type: LinearAdditiveUtilityFunction
+values:
+- type: TableFun
+  mapping:
+    1: 0.0
+    2: 0.15
+    3: 0.25
+    4: 0.4
+    5: 0.55
+    6: 0.65
+    7: 0.75
+    8: 0.85
+    9: 0.92
+    10: 1.0
+- type: TableFun
+  mapping:
+    1: 0.0
+    2: 0.25
+    3: 0.5
+    4: 0.75
+    5: 1.0
+weights:
+- 0.5  # Quality importance
+- 0.5  # Innovation importance

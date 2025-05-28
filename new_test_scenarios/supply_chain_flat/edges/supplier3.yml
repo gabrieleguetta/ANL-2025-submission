@@ -1,0 +1,30 @@
+# scenarios/supply_chain_flat/edges/supplier3.yml
+name: CostEffectiveSupplier
+reserved_value: 0.2
+type: LinearAdditiveUtilityFunction
+values:
+- type: TableFun
+  mapping:
+    1: 0.0   # Very fast delivery is not their strength
+    7: 0.4
+    14: 0.7
+    21: 0.9
+    30: 1.0  # Standard delivery is fine
+- type: TableFun
+  mapping:
+    1: 1.0   # Basic quality is their norm
+    2: 0.8
+    3: 0.6
+    4: 0.3
+    5: 0.0   # High quality is difficult
+- type: TableFun
+  mapping:
+    100: 0.0  # Very low prices hurt them
+    200: 0.3
+    400: 0.6
+    600: 0.8
+    1000: 1.0 # They prefer competitive but not low prices
+weights:
+- 0.2  # Delivery time impact
+- 0.3  # Quality impact
+- 0.5  # Price is most important

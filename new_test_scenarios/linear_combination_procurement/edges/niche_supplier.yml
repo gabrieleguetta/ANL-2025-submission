@@ -1,0 +1,22 @@
+# scenarios/linear_combination_procurement/edges/niche_supplier.yml
+name: NicheSupplier
+reserved_value: 0.4
+type: LinearAdditiveUtilityFunction
+values:
+- type: TableFun
+  mapping:
+    100: 0.0
+    150: 0.1
+    200: 0.4
+    250: 0.7
+    300: 1.0
+- type: TableFun
+  mapping:
+    1: 1.0
+    2: 0.9
+    3: 0.7
+    4: 0.5
+    5: 0.3
+weights:
+- 0.6  # Revenue importance
+- 0.4  # Cost efficiency importance
