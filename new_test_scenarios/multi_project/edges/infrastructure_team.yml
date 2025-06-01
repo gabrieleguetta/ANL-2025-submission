@@ -1,0 +1,30 @@
+# scenarios/multi_project/edges/infrastructure_team.yml
+name: InfrastructureTeam
+reserved_value: 0.4
+type: LinearAdditiveUtilityFunction
+values:
+- type: TableFun
+  mapping:
+    6: 1.0   # 6 months is preferred for infrastructure
+    9: 0.8   # 9 months is acceptable
+    12: 0.6  # 12 months is getting long
+    18: 0.3  # 18 months is quite long for infrastructure
+    24: 0.1  # 24 months is too long
+- type: TableFun
+  mapping:
+    50000: 0.0   # Way too low for infrastructure
+    100000: 0.2
+    200000: 0.5
+    300000: 0.8
+    500000: 1.0  # Good infrastructure budget
+- type: TableFun
+  mapping:
+    5: 0.8   # Small but efficient team
+    8: 1.0   # Ideal infrastructure team
+    12: 0.7  # Adequate size
+    15: 0.4  # Getting too large
+    20: 0.2  # Too many people for infrastructure
+weights:
+- 0.4  # Timeline is important for infrastructure
+- 0.4  # Budget matters for tools/systems
+- 0.2  # Team size preferences
