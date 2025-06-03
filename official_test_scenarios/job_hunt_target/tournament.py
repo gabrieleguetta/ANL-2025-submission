@@ -7,6 +7,7 @@ from myagent.myagent import NewNegotiator
 from myagent.dinners_agent import DinnersNegotiator
 from myagent.job_dinner_agent import ImprovedUnifiedNegotiator
 from myagent.itay_agent import ItayNegotiator
+from myagent.itay_jhn_agent import ItayJhnNegotiator
 
 
 def run_tour(path, agent):
@@ -27,9 +28,11 @@ def run_tour(path, agent):
 
 def test_agents(scenario):
     agents = [
+          ItayJhnNegotiator,
+          JobHunterNegotiator, 
           ItayNegotiator,
-          ImprovedUnifiedNegotiator, 
           DinnersNegotiator, 
+          ImprovedUnifiedNegotiator, 
           NewNegotiator
           ]
     for a in agents:
@@ -39,9 +42,7 @@ def test_agents(scenario):
 
 def run_tournaments():
     path = pathlib.Path("official_test_scenarios/dinners")
-    test_agents(path)
     path = pathlib.Path("official_test_scenarios/TargetQuantity_example")
-    test_agents(path)
     path = pathlib.Path("official_test_scenarios/job_hunt_target")
     test_agents(path)
 
