@@ -115,7 +115,7 @@ class ItayNegotiator(ANL2025Negotiator):
                 
 
                 #   tuple(str(int(outcome[0]) + (0.1 * i_rejected) - (0.1 * opp_rejected)))
-                utility = (ufun(outcome)) + (0.000002 * i_rejected) - (0.00002 * opp_rejected)
+                utility = (ufun(outcome)) + (0.000002  * i_rejected) - (0.000002 * opp_rejected)
                 if outcome is None:
                     utility *= 0.75
                 self.pattern_outcomes[outcome] = utility
@@ -156,13 +156,14 @@ class ItayNegotiator(ANL2025Negotiator):
 
             sampled_outcomes = self._get_possible_outcomes(negotiator_id)
             SAMPLE_SIZE = min(20, len(sampled_outcomes))
+            level = self._get_progress(negotiator_id)
             for _ in range(SAMPLE_SIZE):
                 fake_rest = random.choices(sampled_outcomes, k=remaining)
                 test_context_comb = test_context + fake_rest
                 avg_util_inter = 0
                 sum_util_inter = 0
                 for tc in test_context_comb:
-                    utility = ufun(tc) - (0.01 * opp_rejected * (pow(10, -(3 * self.leverage))))
+                    utility = ufun(tc) - (0.005 * level * opp_rejected * (pow(10, -(3 * self.leverage))))
                     sum_util_inter += utility
                 avg_util_inter = sum_util_inter / len(test_context_comb)
                 sum_utility += avg_util_inter
