@@ -54,7 +54,8 @@ def test_on_job_hunt_scenario():
         #[Linear2025, Linear2025, Linear2025, Linear2025],
         #[Random2025, Random2025, Random2025, Random2025],
         #[JobHunterNegotiator, JobHunterNegotiator, JobHunterNegotiator, JobHunterNegotiator],
-        [JobHunterNegotiator, ItayNegotiator, DinnersNegotiator, ImprovedUnifiedNegotiator],
+        [Boulware2025, Linear2025, ImprovedUnifiedNegotiator],
+        #[JobHunterNegotiator, ItayNegotiator, DinnersNegotiator, ImprovedUnifiedNegotiator],
         #[DinnersNegotiator, DinnersNegotiator, DinnersNegotiator, DinnersNegotiator],
         #[ImprovedUnifiedNegotiator, ImprovedUnifiedNegotiator, ImprovedUnifiedNegotiator, ImprovedUnifiedNegotiator],
         #[Boulware2025, Linear2025, Random2025, Linear2025]
