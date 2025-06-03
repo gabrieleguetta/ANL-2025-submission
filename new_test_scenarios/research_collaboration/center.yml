@@ -1,0 +1,78 @@
+# scenarios/research_collaboration/center.yml
+name: ResearchCoordinator
+type: anl2025.ufun.MeanSMCenterUFun
+reserved_value: 0.0
+n_edges: 3
+outcome_spaces:
+  - type: DiscreteCartesianOutcomeSpace
+    name: TeamAResearch
+    issues:
+    - type: CategoricalIssue
+      name: research_quality
+      values:
+      - 'q1'
+      - 'q2'
+      - 'q3'
+      - 'q4'
+      - 'q5'
+      - 'q6'
+      - 'q7'
+      - 'q8'
+      - 'q9'
+      - 'q10'
+    - type: CategoricalIssue
+      name: innovation_level
+      values:
+      - 'i1'
+      - 'i2'
+      - 'i3'
+      - 'i4'
+      - 'i5'
+  - type: DiscreteCartesianOutcomeSpace
+    name: TeamBResearch
+    issues:
+    - type: CategoricalIssue
+      name: research_quality
+      values:
+      - 'q1'
+      - 'q2'
+      - 'q3'
+      - 'q4'
+      - 'q5'
+      - 'q6'
+      - 'q7'
+      - 'q8'
+      - 'q9'
+      - 'q10'
+    - type: CategoricalIssue
+      name: innovation_level
+      values:
+      - 'i1'
+      - 'i2'
+      - 'i3'
+      - 'i4'
+      - 'i5'
+  - type: DiscreteCartesianOutcomeSpace
+    name: TeamCResearch
+    issues:
+    - type: CategoricalIssue
+      name: research_quality
+      values:
+      - 'q1'
+      - 'q2'
+      - 'q3'
+      - 'q4'
+      - 'q5'
+      - 'q6'
+      - 'q7'
+      - 'q8'
+      - 'q9'
+      - 'q10'
+    - type: CategoricalIssue
+      name: innovation_level
+      values:
+      - 'i1'
+      - 'i2'
+      - 'i3'
+      - 'i4'
+      - 'i5'

@@ -1,0 +1,22 @@
+# scenarios/linear_combination_procurement/edges/critical_supplier.yml
+name: CriticalSupplier
+reserved_value: 0.3
+type: LinearAdditiveUtilityFunction
+values:
+- type: TableFun
+  mapping:
+    100: 0.0
+    150: 0.2
+    200: 0.5
+    250: 0.8
+    300: 1.0
+- type: TableFun
+  mapping:
+    1: 1.0
+    2: 0.8
+    3: 0.6
+    4: 0.4
+    5: 0.2
+weights:
+- 0.7  # Revenue importance
+- 0.3  # Cost efficiency importance

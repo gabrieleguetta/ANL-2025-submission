@@ -1,0 +1,21 @@
+name: TechnicalSupportTeam
+reserved_value: 0.2
+type: LinearAdditiveUtilityFunction
+values:
+- type: TableFun
+  mapping:
+    '50': 1.0
+    '70': 0.6
+    '80': 0.4
+    '90': 0.2
+    '100': 0.0
+- type: TableFun
+  mapping:
+    '1': 1.0
+    '2': 0.7
+    '3': 0.5
+    '4': 0.2
+    '5': 0.0
+weights:
+- 0.7
+- 0.3

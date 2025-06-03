@@ -1,0 +1,27 @@
+# scenarios/research_collaboration/edges/team_a.yml
+name: ResearchTeamA
+reserved_value: 0.2
+type: LinearAdditiveUtilityFunction
+values:
+- type: TableFun
+  mapping:
+    'q1': 0.0
+    'q2': 0.1
+    'q3': 0.2
+    'q4': 0.3
+    'q5': 0.5
+    'q6': 0.6
+    'q7': 0.7
+    'q8': 0.8
+    'q9': 0.9
+    'q10': 1.0
+- type: TableFun
+  mapping:
+    'i1': 0.2
+    'i2': 0.4
+    'i3': 0.7
+    'i4': 0.9
+    'i5': 1.0
+weights:
+- 0.6  # Quality importance
+- 0.4  # Innovation importance

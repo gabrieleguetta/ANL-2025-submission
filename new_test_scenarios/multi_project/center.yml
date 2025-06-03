@@ -1,0 +1,153 @@
+# scenarios/multi_project/center.yml
+name: ProjectPortfolioManager
+type: project_combiner.ProjectPortfolioCombiner
+reserved_value: 0.0
+n_edges: 4
+side_ufuns:
+  - name: software_development
+    reserved_value: 0.0
+    type: LinearAdditiveUtilityFunction
+    values:
+    - type: TableFun
+      mapping:
+        6: 1.0   # 6 months - ideal timeline
+        9: 0.8   # 9 months - acceptable
+        12: 0.6  # 12 months - longer timeline
+        18: 0.3  # 18 months - too long
+        24: 0.0  # 24 months - unacceptable
+    - type: TableFun
+      mapping:
+        50000: 0.0   # Low budget is challenging
+        100000: 0.3
+        200000: 0.6
+        300000: 0.8
+        500000: 1.0  # Higher budget enables better results
+    - type: TableFun
+      mapping:
+        5: 1.0   # 5 team members - optimal
+        8: 0.8   # 8 team members - good
+        12: 0.6  # 12 team members - manageable
+        15: 0.4  # 15 team members - getting difficult
+        20: 0.2  # 20 team members - coordination problems
+    weights:
+    - 0.4  # Timeline importance
+    - 0.3  # Budget importance
+    - 0.3  # Team size importance
+  - name: marketing_campaign
+    reserved_value: 0.0
+    type: LinearAdditiveUtilityFunction
+    values:
+    - type: TableFun
+      mapping:
+        6: 1.0   # 6 months - fast campaign
+        9: 0.9   # 9 months - standard
+        12: 0.7  # 12 months - extended campaign
+        18: 0.4  # 18 months - too long
+        24: 0.1  # 24 months - way too long
+    - type: TableFun
+      mapping:
+        50000: 0.0   # Very limited budget
+        100000: 0.3
+        200000: 0.6
+        300000: 0.8
+        500000: 1.0  # Generous marketing budget
+    - type: TableFun
+      mapping:
+        5: 1.0   # Small focused team
+        8: 0.9   # Good team size
+        12: 0.7  # Larger team
+        15: 0.5  # Getting unwieldy
+        20: 0.2  # Too many people
+    weights:
+    - 0.3  # Timeline importance
+    - 0.5  # Budget importance (critical for marketing)
+    - 0.2  # Team size importance
+  - name: research_development
+    reserved_value: 0.0
+    type: LinearAdditiveUtilityFunction
+    values:
+    - type: TableFun
+      mapping:
+        6: 0.1   # 6 months - too rushed for R&D
+        9: 0.3   # 9 months - still tight
+        12: 1.0  # 12 months - good R&D timeline
+        18: 0.9  # 18 months - acceptable
+        24: 0.7  # 24 months - longer but OK for R&D
+    - type: TableFun
+      mapping:
+        50000: 0.0   # Insufficient R&D budget
+        100000: 0.3
+        200000: 0.6
+        300000: 0.8
+        500000: 1.0  # Substantial R&D investment
+    - type: TableFun
+      mapping:
+        5: 1.0   # Small specialized R&D team
+        8: 0.9   # Good R&D team size
+        12: 0.6  # Larger team
+        15: 0.3  # Too many researchers
+        20: 0.1  # Way too many people
+    weights:
+    - 0.2  # Timeline less critical for R&D
+    - 0.5  # Budget very important for R&D
+    - 0.3  # Team composition important
+  - name: infrastructure_upgrade
+    reserved_value: 0.0
+    type: LinearAdditiveUtilityFunction
+    values:
+    - type: TableFun
+      mapping:
+        6: 1.0   # 6 months - quick infrastructure update
+        9: 0.8   # 9 months - reasonable
+        12: 0.6  # 12 months - longer project
+        18: 0.3  # 18 months - quite long
+        24: 0.1  # 24 months - too long for infrastructure
+    - type: TableFun
+      mapping:
+        50000: 0.0  # Insufficient for good infrastructure
+        100000: 0.3
+        200000: 0.6
+        300000: 0.8
+        500000: 1.0 # Substantial infrastructure investment
+    - type: TableFun
+      mapping:
+        5: 1.0   # Small efficient infrastructure team
+        8: 0.8   # Good team size
+        12: 0.6  # Adequate team
+        15: 0.4  # Getting large
+        20: 0.2  # Too many people
+    weights:
+    - 0.4  # Timeline important for infrastructure
+    - 0.4  # Budget important
+    - 0.2  # Team size matters less
+outcome_space:
+  issues:
+  - n_values: 5
+    name: timeline_months
+    type: negmas.outcomes.categorical_issue.CategoricalIssue
+    values:
+    - 6
+    - 9
+    - 12
+    - 18
+    - 24
+  - n_values: 5
+    name: budget_usd
+    type: negmas.outcomes.categorical_issue.CategoricalIssue
+    values:
+    - 50000
+    - 100000
+    - 200000
+    - 300000
+    - 500000
+  - n_values: 5
+    name: team_size
+    type: negmas.outcomes.categorical_issue.CategoricalIssue
+    values:
+    - 5
+    - 8
+    - 12
+    - 15
+    - 20
+  name: ProjectNegotiation
+  type: negmas.outcomes.outcome_space.DiscreteCartesianOutcomeSpace

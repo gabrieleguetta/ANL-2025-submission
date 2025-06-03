@@ -1,0 +1,22 @@
+# scenarios/linear_combination_procurement/edges/secondary_supplier.yml
+name: SecondarySupplier
+reserved_value: 0.2
+type: LinearAdditiveUtilityFunction
+values:
+- type: TableFun
+  mapping:
+    100: 0.0
+    150: 0.3
+    200: 0.6
+    250: 0.8
+    300: 1.0
+- type: TableFun
+  mapping:
+    1: 1.0
+    2: 0.7
+    3: 0.5
+    4: 0.3
+    5: 0.1
+weights:
+- 0.8  # Revenue importance
+- 0.2  # Cost efficiency importance

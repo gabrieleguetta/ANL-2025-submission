@@ -40,6 +40,9 @@ class JobHunterNegotiator(ANL2025Negotiator):
         #Initalize variables
         self.current_neg_index = -1
         self.target_bid = None
+        self.is_debugging = False
+        self.max_cases_to_compute = 10e4
+        self.is_max_ufun = (not is_edge_agent(self)) and self.preferences.short_type_name == 'MCUF'
 
         # Make a dictionary that maps the index of the negotiation to the negotiator id. The index of the negotiation is the order in which the negotiation happen in sequence.
         self.id_dict = {}
@@ -79,10 +82,12 @@ class JobHunterNegotiator(ANL2025Negotiator):
         self.my_print("propose {0} to {1} at step {2}.".format(bid, negotiator_id, self.c_step_))
         return bid
 
+
     def get_offer_util_idx(self, offer):
         for i in range(len(self.options_by_opponent_utilities)):
             if self.options_by_opponent_utilities[i][3] == offer:
                 return i
+
 
     def respond(
             self, negotiator_id: str, state: SAOState, source: str | None = None
@@ -99,8 +104,6 @@ class JobHunterNegotiator(ANL2025Negotiator):
             self.start_new_round(negotiator_id)
             self._update_strategy()
         
-        # Keep track of the opponent behaviour
-        self.opponent_selections.append(self.get_offer_util_idx(state.current_offer))
 
         # This agent is very stubborn: it only accepts an offer if it is EXACTLY the target bid it wants to have.
         #if state.current_offer is get_target_bid_at_current_index(self):
@@ -117,12 +120,14 @@ class JobHunterNegotiator(ANL2025Negotiator):
         neg_index = get_current_negotiation_index(self)
         return [get_agreement_at_index(self,i) for i in range(neg_index)]
     
+
     def start_new_round(self, negotiator_id):
         _, cntxt = self.negotiators[negotiator_id]
         self.op_ufun: SideUFun = cntxt["ufun"]
         self.c_round_ = len(self.finished_negotiators)
-        self.opponent_selections = []
+        self.curr_op_nmi = self.get_nmi_from_id(negotiator_id)
     
+
     def _update_strategy(self) -> None:
         """Update the strategy of the agent after a negotiation has ended.
                """
@@ -134,12 +139,14 @@ class JobHunterNegotiator(ANL2025Negotiator):
             all_possible = self.get_possibilities_edge()
             utils = [(outcome, self.ufun(outcome), self.op_ufun(outcome), outcome) for outcome in all_possible]
             self.order_utilities(utils)
+            self.can_improve = True
         else:
             all_possible = self.get_possibilities()
             utils = [(outcome, self.ufun(outcome), self.op_ufun(outcome[self.c_round_]), outcome[self.c_round_]) for outcome in all_possible]
             self.order_utilities(utils)
 
             self.calc_cur_util()
+            self.can_improve = self.can_improve_state()
             best_bid = self.find_best_bid()
         
         self.target_bid = best_bid
@@ -174,7 +181,6 @@ class JobHunterNegotiator(ANL2025Negotiator):
     def order_utilities(self, utilities):
         self.options_by_utilities = sorted(utilities, key = lambda x: x[1])
         self.options_by_opponent_utilities = sorted(utilities, key = lambda x: x[2])
-        self.opponent_selections = []
 
     def improvement_by_offer(self, offer):
         deals_with_offer = self.get_prev_agreements()
@@ -195,18 +201,56 @@ class JobHunterNegotiator(ANL2025Negotiator):
             return 1
         return state.relative_time
 
+
     def get_possibilities_edge(self)->list[Outcome | None]:
         return get_outcome_space_from_index(self, 0)
+
+
+    def can_all_possib_be_computed(self):
+        if not self.preferences.outcome_space.is_finite():
+            return False
+        
+        n_possib_left = 1
+        neg_index = get_current_negotiation_index(self)
+        n_neg = len(self.negotiators)
+        for i in range(neg_index, n_neg):
+            if not self.is_max_ufun:
+                n_possib_left = n_possib_left * len(get_outcome_space_from_index(self, neg_index))
+            else:
+                n_possib_left = n_possib_left + len(get_outcome_space_from_index(self, neg_index))
+        return n_possib_left <= self.max_cases_to_compute
+
+
+    def calc_out_space_max_cent(self):
+        neg_idx = get_current_negotiation_index(self)
+        n_neg = len(self.negotiators)
+
+        current_outcomes = self.get_prev_agreements()
+        bids = get_outcome_space_from_index(self, neg_idx)
+        no_deals_with_next_negs = [None] * (n_neg - (neg_idx + 1))
+
+        return [current_outcomes + [bid] + no_deals_with_next_negs for bid in bids]
+
+
+    def get_outcome_space(self):
+        # get outcome space for general case and narrowed outcome space for max center
+        if self.is_max_ufun:
+            return self.calc_out_space_max_cent()
+        return all_possible_bids_with_agreements_fixed(self)
+
 
     def get_possibilities(self)->list[list[Outcome | None]]:
         '''All option bids for current round, each option represented as full set with the previous deals
         inserted and next deals equals to bid.'''
-        current_outcomes = self.get_prev_agreements()
-        neg_index = get_current_negotiation_index(self)
-        n_neg = len(self.negotiators)
-        bids = get_outcome_space_from_index(self, neg_index)
-        single_bid_per_outcome = [[current_outcomes[i] if i < neg_index else bid for i in range(n_neg)] for bid in bids]
-        return single_bid_per_outcome
+        self.should_consider_full_outcome_space = self.can_all_possib_be_computed()
+        a = list(self.curr_op_nmi.outcome_space.enumerate_or_sample(max_cardinality=20))
+        if not self.should_consider_full_outcome_space:
+            # get sample and return it
+            sampled_outcome_space = []
+            return sampled_outcome_space
+        
+        return self.get_outcome_space()
+        # TODO: in case of != Max -> calc distribution for all possib of min(1000/len(bids), n_neg-neg_index) following indexes and the rest as None
 
 
     def find_bid_with_utility_level(self, concession_factor, possible_by_utilities: list[Outcome]):
@@ -216,11 +260,13 @@ class JobHunterNegotiator(ANL2025Negotiator):
         return possible_by_utilities[possible_index][0]
         
     def can_improve_state(self):
-        op_by_ut = self.options_by_utilities
-        n_offers = len(op_by_ut)
-        if n_offers > 0 and op_by_ut[0][1] != op_by_ut[n_offers - 1][1]:
-            return True
-        return False
+        if self.preferences.short_type_name == 'MCUF':
+            op_by_ut = self.options_by_utilities
+            n_offers = len(op_by_ut)
+            if n_offers > 0 and op_by_ut[0][1] != op_by_ut[n_offers - 1][1]:
+                return True
+            return False
+        return True
 
     def min_max_offer(self):
         pos_by_ut = self.options_by_utilities
@@ -243,7 +289,7 @@ class JobHunterNegotiator(ANL2025Negotiator):
         else:
             possible_by_utilities = self.options_by_utilities
 
-            if not self.can_improve_state():
+            if not self.can_improve:
                 return None
             
             best_bid = self.min_max_offer()[self.c_round_]
