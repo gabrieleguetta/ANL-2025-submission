@@ -155,19 +155,29 @@ class ItayNegotiator(ANL2025Negotiator):
 
 
             sampled_outcomes = self._get_possible_outcomes(negotiator_id)
-            SAMPLE_SIZE = min(20, len(sampled_outcomes))
+            # SAMPLE_SIZE = min(20, len(sampled_outcomes))
             level = self._get_progress(negotiator_id)
-            for _ in range(SAMPLE_SIZE):
-                fake_rest = random.choices(sampled_outcomes, k=remaining)
-                test_context_comb = test_context + fake_rest
-                avg_util_inter = 0
-                sum_util_inter = 0
-                for tc in test_context_comb:
-                    utility = ufun(tc) - (0.005 * level * opp_rejected * (pow(10, -(3 * self.leverage))))
-                    sum_util_inter += utility
-                avg_util_inter = sum_util_inter / len(test_context_comb)
-                sum_utility += avg_util_inter
-            avg_util = sum_utility / SAMPLE_SIZE
+
+            fake_rest = random.choices(sampled_outcomes, k=remaining)
+            test_context_comb = test_context + fake_rest
+            avg_util_inter = 0
+            sum_util_inter = 0
+            for tc in test_context_comb:
+                utility = ufun(tc) - (0.005 * level * opp_rejected * (pow(10, -(3 * self.leverage))))
+                sum_util_inter += utility
+            avg_util = avg_util_inter = sum_util_inter / len(test_context_comb)
+            sum_utility += avg_util_inter
+            # for _ in range(SAMPLE_SIZE):
+            #     fake_rest = random.choices(sampled_outcomes, k=remaining)
+            #     test_context_comb = test_context + fake_rest
+            #     avg_util_inter = 0
+            #     sum_util_inter = 0
+            #     for tc in test_context_comb:
+            #         utility = ufun(tc) - (0.005 * level * opp_rejected * (pow(10, -(3 * self.leverage))))
+            #         sum_util_inter += utility
+            #     avg_util_inter = sum_util_inter / len(test_context_comb)
+            #     sum_utility += avg_util_inter
+            # avg_util = sum_utility / SAMPLE_SIZE
             if outcome is None:
                 avg_util *= 0.75
             self.pattern_outcomes[outcome] = avg_util
