@@ -126,9 +126,11 @@ class ItayNegotiator(ANL2025Negotiator):
             return best_outcome, best_utility
 
 
-        context = list(self.agreements)
+        context = self.agreements.copy()
+        # print(context, negotiator_id)
         len_ctxt = len(context)
-        context += [None] #* (len(self.negotiators) - len(context))
+        # if len(context) == 0:
+        context += [(None, None)] #* (len(self.negotiators) - len(context))
         self.pattern_outcomes = {}
         best_outcome = None
         best_utility = float('-inf')
@@ -137,6 +139,8 @@ class ItayNegotiator(ANL2025Negotiator):
         outcomes = self._get_possible_outcomes(negotiator_id)
         outcomes.append(self.current_offer)
         for outcome in outcomes:
+            if outcome is None:
+                continue
             test_context = context.copy()
             test_context[int(negotiator_id[1])] = outcome
             # rest_combs = itertools.combinations(self._get_possible_outcomes(negotiator_id), len(self.negotiators.keys()) - (len_ctxt + 1))
@@ -158,15 +162,21 @@ class ItayNegotiator(ANL2025Negotiator):
             # SAMPLE_SIZE = min(20, len(sampled_outcomes))
             level = self._get_progress(negotiator_id)
 
-            fake_rest = random.choices(sampled_outcomes, k=remaining)
+            # fake_rest = random.choices(sampled_outcomes, k=remaining)
+            fake_rest = [(None, None)] * remaining
             test_context_comb = test_context + fake_rest
             avg_util_inter = 0
             sum_util_inter = 0
-            for tc in test_context_comb:
-                utility = ufun(tc) - (0.005 * level * opp_rejected * (pow(10, -(3 * self.leverage))))
-                sum_util_inter += utility
-            avg_util = avg_util_inter = sum_util_inter / len(test_context_comb)
-            sum_utility += avg_util_inter
+            # for tc in test_context:
+            # print(test_context_comb)
+            # print(test_context)
+
+            test_context = [tc[0] for tc in test_context]
+
+            utility = ufun(test_context) - (0.05 * level * opp_rejected * (pow(10, -(1 * self.leverage - 1))))
+            # sum_util_inter += utility
+            avg_util = utility# = avg_util_inter = sum_util_inter / len(test_context)
+            # sum_utility += avg_util_inter
             # for _ in range(SAMPLE_SIZE):
             #     fake_rest = random.choices(sampled_outcomes, k=remaining)
             #     test_context_comb = test_context + fake_rest
@@ -195,7 +205,7 @@ class ItayNegotiator(ANL2025Negotiator):
             if avg_util > best_utility:
                 best_outcome = outcome
                 best_utility = avg_util
-
+        
         # Try having no agreement
         test_context = context.copy()
         test_context += [None for i in range(len(self.negotiators.keys()) - (len_ctxt + 1))]
@@ -243,12 +253,12 @@ class ItayNegotiator(ANL2025Negotiator):
     def propose(self, negotiator_id, state, dest=None):
         if negotiator_id.startswith('s'):
             pass
-        if negotiator_id != self.last_neg and self.last_neg != '':
-            self.agreements.append(self.last_proposal)
+        # if negotiator_id != self.last_neg and self.last_neg != '':
+            # self.agreements.append(self.last_proposal)
         """Generate a proposal in the negotiation."""
         # Check if negotiation has ended and update strategy
-        if did_negotiation_end(self):
-            self._update_agreements_if_needed()
+            # print('hi1', self.current_neg_index, self.finished_negotiators)
+        self._update_agreements_if_needed()
 
         self.cur_state = state
         negotiator, cntxt = self.negotiators[negotiator_id]
@@ -286,8 +296,8 @@ class ItayNegotiator(ANL2025Negotiator):
             pass
         """Respond to a proposal in the negotiation."""
         # Check if negotiation has ended and update strategy
-        if did_negotiation_end(self):
-            self._update_agreements_if_needed()
+            # print('hi', self.current_neg_index, self.finished_negotiators)
+        self._update_agreements_if_needed()
         
         # If no offer, reject
         self.cur_state = state
@@ -315,7 +325,7 @@ class ItayNegotiator(ANL2025Negotiator):
         all_utilities = list(self.pattern_outcomes.values())
         mean_utility = numpy.mean(all_utilities)
         progress = self._get_progress(negotiator_id)
-        agent_type_factor =1 if is_edge_agent(self) else 1.2
+        agent_type_factor = 1 if is_edge_agent(self) else 1
         
 
 # Variance adjustment — higher std => lower z
@@ -325,31 +335,41 @@ class ItayNegotiator(ANL2025Negotiator):
 # Normalize std_utility against mean to make it scale-invariant
         std_ratio = std_utility / (numpy.mean(all_utilities) + 1e-5)
         # print(agent_type_factor)
-        base_z = 6 * ((1 - progress) * (agent_type_factor) )
+        base_z = agent_type_factor * 3 * ((1 - progress))
 
 # Final z: reduced further as variance increases (e.g., z ~ 1/std)
         z = base_z / (1 +  5 * (std_ratio))  # 20 is a tuning hyperparameter
         # z = max(-5, z)
+        if negotiator_id.startswith('s'):
+            print(negotiator_id, ':  received', current_offer, 'at', level, 'utility', offer_utility, 'mean', (mean_utility ), 'best_utility',  best_utility)
         if not is_edge_agent(self):
             pass
         if offer_utility > (mean_utility + (z * std_utility)):
-            
-            print(negotiator_id, ':  ', level, offer_utility, (mean_utility + (z * std_utility)), best_utility)
-
             return ResponseType.ACCEPT_OFFER
-
+        if (offer_utility / best_utility) < 0.15:
+            print('good enough')
+            return ResponseType.ACCEPT_OFFER
+        
         return ResponseType.REJECT_OFFER
 
     def _update_agreements_if_needed(self):
         """Update the agreements list if a negotiation has ended."""
         if did_negotiation_end(self):
+            # print('yo')
             # Store the agreement from the just-ended negotiation
+            # self.current_neg_index = int(self.current_neg_index[1])
             prev_index = self.current_neg_index - 1
+            # print(self.current_neg_index)
             if prev_index >= 0:
                 agreement = get_agreement_at_index(self, prev_index)
+                # print(self.current_neg_index)
+                # print(self.agreements)
                 while len(self.agreements) <= prev_index:
+                    # print('APPEND_NONE')
                     self.agreements.append(None)
+                # print('APPEND_PREV')
                 self.agreements[prev_index] = agreement
+                # print(self.agreements)
                 return True
         return False
 
