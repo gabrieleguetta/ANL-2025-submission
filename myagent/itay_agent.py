@@ -115,7 +115,7 @@ class ItayNegotiator(ANL2025Negotiator):
                 
 
                 #   tuple(str(int(outcome[0]) + (0.1 * i_rejected) - (0.1 * opp_rejected)))
-                utility = (ufun(outcome)) + (0.000002  * i_rejected) - (0.000002 * opp_rejected)
+                utility = (ufun(outcome)) + (0.000001  * i_rejected) - (0.00002 * opp_rejected)
                 if outcome is None:
                     utility *= 0.75
                 self.pattern_outcomes[outcome] = utility
@@ -340,8 +340,8 @@ class ItayNegotiator(ANL2025Negotiator):
 # Final z: reduced further as variance increases (e.g., z ~ 1/std)
         z = base_z / (1 +  5 * (std_ratio))  # 20 is a tuning hyperparameter
         # z = max(-5, z)
-        if negotiator_id.startswith('s'):
-            print(negotiator_id, ':  received', current_offer, 'at', level, 'utility', offer_utility, 'mean', (mean_utility ), 'best_utility',  best_utility)
+        # if negotiator_id.startswith('e3'):
+        #     print(negotiator_id, ':  received', current_offer, 'at', level, 'utility', offer_utility, 'mean', (mean_utility ), 'best_utility',  best_utility)
         if not is_edge_agent(self):
             pass
         if offer_utility > (mean_utility + (z * std_utility)):
