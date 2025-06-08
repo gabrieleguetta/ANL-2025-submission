@@ -20,10 +20,10 @@ scenario1 = MultidealScenario.from_folder(path1)
 scenario2 = MultidealScenario.from_folder(path2)
 scenario3 = MultidealScenario.from_folder(path3)
 results = anl2025_tournament(
-    scenarios=[scenario1],
-    n_repetitions=10,
+    scenarios=[scenario1, scenario3],
+    n_repetitions=200,
     n_jobs=-1,
-    competitors=(ItayNegotiator, Boulware2025),
+    competitors=(ItayNegotiator, Boulware2025, Linear2025),
     verbose=True,
      no_double_scores=False,
 )

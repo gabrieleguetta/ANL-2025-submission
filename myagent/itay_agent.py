@@ -115,7 +115,7 @@ class ItayNegotiator(ANL2025Negotiator):
                 
 
                 #   tuple(str(int(outcome[0]) + (0.1 * i_rejected) - (0.1 * opp_rejected)))
-                utility = (ufun(outcome)) + (0.000002  * i_rejected) - (0.000002 * opp_rejected)
+                utility = (ufun(outcome)) + (0.000001  * i_rejected) - (0.00002 * opp_rejected)
                 if outcome is None:
                     utility *= 0.75
                 self.pattern_outcomes[outcome] = utility
@@ -172,15 +172,15 @@ class ItayNegotiator(ANL2025Negotiator):
             # print(test_context)
 
             #test_context = [tc[0] for tc in test_context]
-            print(self.id)
-            print(len(self.negotiators))
-            print(remaining)
-            print(test_context)
-            print(len(test_context_comb))
-            print(test_context_comb)
+            # print(self.id)
+            # print(len(self.negotiators))
+            # print(remaining)
+            # print(test_context)
+            # print(len(test_context_comb))
+            # print(test_context_comb)
             if len(test_context_comb) < 2:
                 print(1)
-            utility = self.ufun(test_context_comb) - (0.05 * level * opp_rejected * (pow(10, -(1 * self.leverage - 1))))
+            utility = self.ufun(test_context_comb) - (0.05 * level * opp_rejected * (pow(10, -(3 * (self.leverage - 1)))))
             # sum_util_inter += utility
             avg_util = utility# = avg_util_inter = sum_util_inter / len(test_context)
             # sum_utility += avg_util_inter
@@ -347,8 +347,8 @@ class ItayNegotiator(ANL2025Negotiator):
 # Final z: reduced further as variance increases (e.g., z ~ 1/std)
         z = base_z / (1 +  5 * (std_ratio))  # 20 is a tuning hyperparameter
         # z = max(-5, z)
-        if negotiator_id.startswith('s'):
-            print(negotiator_id, ':  received', current_offer, 'at', level, 'utility', offer_utility, 'mean', (mean_utility ), 'best_utility',  best_utility)
+        # if negotiator_id.startswith('e3'):
+        #     print(negotiator_id, ':  received', current_offer, 'at', level, 'utility', offer_utility, 'mean', (mean_utility ), 'best_utility',  best_utility)
         if not is_edge_agent(self):
             pass
         if offer_utility > (mean_utility + (z * std_utility)):
