@@ -62,19 +62,18 @@ class McufAdapter():
         self.can_compute_all_pos = self.can_all_possib_be_computed(agent)
         self.neg_idx = get_current_negotiation_index(agent)
         self.n_neg = len(agent.negotiators)
-        if self.is_mcuf:
-            if is_edge_agent(agent):
-                all_possible = self.get_possibilities_edge(agent)
-                utils = [(outcome, self.ufun(outcome), outcome) for outcome in all_possible]
-                self.order_utilities(utils)
-                self.can_improve = True
-            else:
-                all_possible = self.get_outcome_space(agent)
-                utils = [(outcome, self.ufun(outcome), outcome[self.c_round_]) for outcome in all_possible]
-                self.order_utilities(utils)
-                self.calc_cur_util_mcuf()
+        if is_edge_agent(agent):
+            all_possible = self.get_possibilities_edge(agent)
+            utils = [(outcome, self.ufun(outcome), outcome) for outcome in all_possible]
+            self.order_utilities(utils)
+            self.can_improve = True
+        else:
+            all_possible = self.get_outcome_space(agent)
+            utils = [(outcome, self.ufun(outcome), outcome[self.c_round_]) for outcome in all_possible]
+            self.order_utilities(utils)
+            self.calc_cur_util_mcuf()
 
-                self.can_improve = self.can_improve_state()
+            self.can_improve = self.can_improve_state()
     
 
     def order_utilities(self, utilities):
@@ -136,14 +135,14 @@ class McufAdapter():
         return get_outcome_space_from_index(agent, 0)
 
             
-    def get_outcome_space(self):
+    def get_outcome_space(self, agent):
         # get outcome space for general case and narrowed outcome space for max center
         #if self.is_mcuf:
         #else:
         #return all_possible_bids_with_agreements_fixed(self)
         #return self.calc_outcome_space_mcuf()
-        current_outcomes = self.get_prev_agreements()
-        bids = get_outcome_space_from_index(self, self.neg_idx)
+        current_outcomes = self.get_prev_agreements(agent)
+        bids = get_outcome_space_from_index(agent, self.neg_idx)
         no_deals_with_next_negs = [None] * (self.n_neg - (self.neg_idx + 1))
 
         return [current_outcomes + [bid] + no_deals_with_next_negs for bid in bids]
@@ -196,7 +195,7 @@ class ItayJhnNegotiator(ANL2025Negotiator):
             self.adapter = MockAdapter()
             self.adapter.init()
             
-        self.is_debugging = True
+        self.is_debugging = False
         #self.utilities = [None] * len(self.negotiators)
 
 
@@ -272,9 +271,9 @@ class ItayJhnNegotiator(ANL2025Negotiator):
             return best_outcome, best_utility
 
 
-        context = list(self.agreements)
+        context = self.agreements.copy()
         len_ctxt = len(context)
-        context += [None] #* (len(self.negotiators) - len(context))
+        context += [(None, None)] #* (len(self.negotiators) - len(context))
         self.pattern_outcomes = {}
         best_outcome = None
         best_utility = float('-inf')
@@ -283,6 +282,8 @@ class ItayJhnNegotiator(ANL2025Negotiator):
         outcomes = self._get_possible_outcomes(negotiator_id)
         outcomes.append(self.current_offer)
         for outcome in outcomes:
+            if outcome is None:
+                continue
             test_context = context.copy()
             test_context[int(negotiator_id[1])] = outcome
             # rest_combs = itertools.combinations(self._get_possible_outcomes(negotiator_id), len(self.negotiators.keys()) - (len_ctxt + 1))
@@ -296,37 +297,25 @@ class ItayJhnNegotiator(ANL2025Negotiator):
             sum_utility = 0
             num_utility = 0
             combs_list = []
-            remaining = len(self.negotiators) - (len_ctxt + 1)
+            remaining = len(self.negotiators) - len(self.finished_negotiators) - 1#(len_ctxt + 1)
 
 
 
             sampled_outcomes = self._get_possible_outcomes(negotiator_id)
-            SAMPLE_SIZE = min(20, len(sampled_outcomes))
+            #SAMPLE_SIZE = min(20, len(sampled_outcomes))
             level = self._get_progress(negotiator_id)
-            for _ in range(SAMPLE_SIZE):
-                fake_rest = random.choices(sampled_outcomes, k=remaining)
-                test_context_comb = test_context + fake_rest
-                avg_util_inter = 0
-                sum_util_inter = 0
-                for tc in test_context_comb:
-                    utility = ufun(tc) - (0.005 * level * opp_rejected * (pow(10, -(3 * self.leverage))))
-                    sum_util_inter += utility
-                avg_util_inter = sum_util_inter / len(test_context_comb)
-                sum_utility += avg_util_inter
-            avg_util = sum_utility / SAMPLE_SIZE
+            fake_rest = [None] * remaining
+            test_context_comb = test_context + fake_rest
+            avg_util_inter = 0
+            sum_util_inter = 0
+
+            utility = self.ufun(test_context_comb) - (0.05 * level * opp_rejected * (pow(10, -(1 * self.leverage - 1))))
+            avg_util = utility# = avg_util_inter = sum_util_inter / len(test_context)
+
             if outcome is None:
                 avg_util *= 0.75
             self.pattern_outcomes[outcome] = avg_util
 
-
-            # Calculate the average theoretic rest of negotiation utility for the outcome
-            # for c in rest_combs:
-            #     test_context_comb = test_context.copy() + list(c)
-            #     utility = ((8 / self.leverage) * self.ufun(tuple(test_context_comb))) + (0.001 * i_rejected) - ((0.01 * opp_rejected) * (1/self.leverage))
-            #     sum_utility += utility
-            #     num_utility += 1
-            # avg_util = sum_utility / num_utility
-            # self.pattern_outcomes[outcome] = avg_util
 
             if avg_util > best_utility:
                 best_outcome = outcome
@@ -344,7 +333,7 @@ class ItayJhnNegotiator(ANL2025Negotiator):
 
 
     def calc_dict(self, negotiator_id, nmi, ufun, level):
-        if negotiator_id.startswith('e'):
+        if is_edge_agent(self):
             pass
         if negotiator_id not in self.rejection_counts:
             self.rejection_counts[negotiator_id] = {}
@@ -443,7 +432,7 @@ class ItayJhnNegotiator(ANL2025Negotiator):
             return ResponseType.REJECT_OFFER
         # print(f'{self.id} recieves {state.current_offer}')
 
-        if self.adapter.can_compute_all_pos:                    #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+        if self.adapter.can_compute_all_pos:
             if self.adapter.does_offer_not_improve_utility(self, state.current_offer):
                 self.my_print("{0}: offer {1} rejected (mcuf).".format("e" if is_edge_agent(self) else "c", state.current_offer))
                 return ResponseType.REJECT_OFFER
@@ -478,7 +467,7 @@ class ItayJhnNegotiator(ANL2025Negotiator):
 # Normalize std_utility against mean to make it scale-invariant
         std_ratio = std_utility / (numpy.mean(all_utilities) + 1e-5)
         # print(agent_type_factor)
-        base_z = 6 * ((1 - progress) * (agent_type_factor) )
+        base_z = 3 * ((1 - progress) * (agent_type_factor) )
 
 # Final z: reduced further as variance increases (e.g., z ~ 1/std)
         z = base_z / (1 +  5 * (std_ratio))  # 20 is a tuning hyperparameter
@@ -487,11 +476,17 @@ class ItayJhnNegotiator(ANL2025Negotiator):
             pass
         if offer_utility > (mean_utility + (z * std_utility)):
             
-            print(negotiator_id, ':  ', level, offer_utility, (mean_utility + (z * std_utility)), best_utility)
+            self.my_print("{0}: {1}, {2}, {3}, {4}".format(negotiator_id, level, offer_utility, (mean_utility + (z * std_utility)), best_utility))
 
             self.my_print("{0}: offer {1} accepted.".format("e" if is_edge_agent(self) else "c", state.current_offer))
             return ResponseType.ACCEPT_OFFER
 
+        if (offer_utility / best_utility) < 0.15:
+            self.my_print('good enough')
+        
+            self.my_print("{0}: offer {1} rejected.".format("e" if is_edge_agent(self) else "c", state.current_offer))
+            return ResponseType.ACCEPT_OFFER
+        
         self.my_print("{0}: offer {1} rejected.".format("e" if is_edge_agent(self) else "c", state.current_offer))
         return ResponseType.REJECT_OFFER
 

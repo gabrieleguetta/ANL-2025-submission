@@ -172,14 +172,7 @@ class ItayNegotiator(ANL2025Negotiator):
             # print(test_context)
 
             #test_context = [tc[0] for tc in test_context]
-            print(self.id)
-            print(len(self.negotiators))
-            print(remaining)
-            print(test_context)
-            print(len(test_context_comb))
-            print(test_context_comb)
-            if len(test_context_comb) < 2:
-                print(1)
+
             utility = self.ufun(test_context_comb) - (0.05 * level * opp_rejected * (pow(10, -(1 * self.leverage - 1))))
             # sum_util_inter += utility
             avg_util = utility# = avg_util_inter = sum_util_inter / len(test_context)

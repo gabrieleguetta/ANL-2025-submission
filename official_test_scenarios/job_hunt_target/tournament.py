@@ -15,8 +15,7 @@ def run_tour(path, agent):
     scenario = MultidealScenario.from_folder(path)
     generated_scenario = make_multideal_scenario(nedges=3)
     results = anl2025_tournament(
-        scenarios=[scenario, generated_scenario],
-        n_repetitions=10,
+        scenarios=[scenario],
         n_jobs=-1,
         competitors=(agent, Linear2025),
         verbose=False,
@@ -29,7 +28,7 @@ def run_tour(path, agent):
     scenario = MultidealScenario.from_folder(path)
     generated_scenario = make_multideal_scenario(nedges=3)
     results = anl2025_tournament(
-        scenarios=[scenario, generated_scenario],
+        scenarios=[scenario],
         n_repetitions=10,
         n_jobs=-1,
         competitors=(agent, Boulware2025),
@@ -43,10 +42,8 @@ def run_tour(path, agent):
 
 def test_agents(scenario):
     agents = [
-            ItayNegotiator,
             ItayJhnNegotiator,
-            JobHunterNegotiator,
-            Boulware2025,
+            ItayNegotiator,
           ]
     for a in agents:
         print(a.__name__)
