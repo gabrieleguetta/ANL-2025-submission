@@ -15,7 +15,7 @@ def run_tour(path, agent):
     scenario = MultidealScenario.from_folder(path)
     generated_scenario = make_multideal_scenario(nedges=3)
     results = anl2025_tournament(
-        scenarios=[scenario, generated_scenario],
+        scenarios=[scenario],
         n_jobs=-1,
         competitors=(agent, Boulware2025, Linear2025),
         verbose=True,
@@ -28,9 +28,9 @@ def run_tour(path, agent):
 
 def test_agents(scenario):
     agents = [
+          ItayNegotiator,
           ItayJhnNegotiator,
           JobHunterNegotiator, 
-          ItayNegotiator,
           DinnersNegotiator, 
           ImprovedUnifiedNegotiator, 
           NewNegotiator
