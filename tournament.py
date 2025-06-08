@@ -6,7 +6,7 @@ from myagent.job_dinner_agent import ImprovedUnifiedNegotiator
 from myagent.itay_agent import ItayNegotiator
 from myagent.dinners_agent import DinnersNegotiator
 from myagent.job_henter_agent import JobHunterNegotiator
-
+# import cProfile
 
 generated_scenario = make_multideal_scenario(nedges=3)
 # TargetQuantity_example
