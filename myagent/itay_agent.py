@@ -163,7 +163,7 @@ class ItayNegotiator(ANL2025Negotiator):
             level = self._get_progress(negotiator_id)
 
             # fake_rest = random.choices(sampled_outcomes, k=remaining)
-            fake_rest = [(None, None)] * remaining
+            fake_rest = [None] * remaining
             test_context_comb = test_context + fake_rest
             avg_util_inter = 0
             sum_util_inter = 0
@@ -171,9 +171,9 @@ class ItayNegotiator(ANL2025Negotiator):
             # print(test_context_comb)
             # print(test_context)
 
-            test_context = [tc[0] for tc in test_context]
+            #test_context = [tc[0] for tc in test_context]
 
-            utility = ufun(test_context) - (0.05 * level * opp_rejected * (pow(10, -(1 * self.leverage - 1))))
+            utility = self.ufun(test_context_comb) - (0.05 * level * opp_rejected * (pow(10, -(1 * self.leverage - 1))))
             # sum_util_inter += utility
             avg_util = utility# = avg_util_inter = sum_util_inter / len(test_context)
             # sum_utility += avg_util_inter
