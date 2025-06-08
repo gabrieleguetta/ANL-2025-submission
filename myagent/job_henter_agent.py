@@ -225,7 +225,7 @@ class JobHunterNegotiator(ANL2025Negotiator):
 
     def get_outcome_space(self):
         # get outcome space for general case and narrowed outcome space for max center
-        if self.is_max_ufun:
+        if self.is_mcuf:
             return self.calc_outcome_space_mcuf()
         return all_possible_bids_with_agreements_fixed(self)
 

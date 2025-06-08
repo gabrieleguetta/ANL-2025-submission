@@ -9,7 +9,7 @@
             "name": "Python: Module",
             "type": "debugpy",
             "request": "launch",
-            "module": "official_test_scenarios.job_hunt_target.jht_center",
+            "module": "official_test_scenarios.job_hunt_target.tournament",
             "justMyCode": false
         }
     ]

@@ -154,7 +154,7 @@ class ItayNegotiator(ANL2025Negotiator):
             sum_utility = 0
             num_utility = 0
             combs_list = []
-            remaining = len(self.negotiators) - (len_ctxt + 1)
+            remaining = len(self.negotiators) - len(self.finished_negotiators) - 1#(len_ctxt + 1)
 
 
 
@@ -163,7 +163,7 @@ class ItayNegotiator(ANL2025Negotiator):
             level = self._get_progress(negotiator_id)
 
             # fake_rest = random.choices(sampled_outcomes, k=remaining)
-            fake_rest = [(None, None)] * remaining
+            fake_rest = [None] * remaining
             test_context_comb = test_context + fake_rest
             avg_util_inter = 0
             sum_util_inter = 0
@@ -171,9 +171,16 @@ class ItayNegotiator(ANL2025Negotiator):
             # print(test_context_comb)
             # print(test_context)
 
-            test_context = [tc[0] for tc in test_context]
-
-            utility = ufun(test_context) - (0.05 * level * opp_rejected * (pow(10, -(1 * self.leverage - 1))))
+            #test_context = [tc[0] for tc in test_context]
+            print(self.id)
+            print(len(self.negotiators))
+            print(remaining)
+            print(test_context)
+            print(len(test_context_comb))
+            print(test_context_comb)
+            if len(test_context_comb) < 2:
+                print(1)
+            utility = self.ufun(test_context_comb) - (0.05 * level * opp_rejected * (pow(10, -(1 * self.leverage - 1))))
             # sum_util_inter += utility
             avg_util = utility# = avg_util_inter = sum_util_inter / len(test_context)
             # sum_utility += avg_util_inter
@@ -218,7 +225,7 @@ class ItayNegotiator(ANL2025Negotiator):
 
 
     def calc_dict(self, negotiator_id, nmi, ufun, level):
-        if negotiator_id.startswith('e'):
+        if is_edge_agent(self):
             pass
         if negotiator_id not in self.rejection_counts:
             self.rejection_counts[negotiator_id] = {}
@@ -264,9 +271,9 @@ class ItayNegotiator(ANL2025Negotiator):
         negotiator, cntxt = self.negotiators[negotiator_id]
         nmi = negotiator.nmi
         level = self._get_progress(negotiator_id)
-        ufun: SideUFun = cntxt["ufun"]
+        ufun: SideUFun = self.ufun#cntxt["ufun"]
         if not is_edge_agent(self):
-           ufun: CenterUFun = cntxt['ufun']
+           ufun: CenterUFun = self.ufun#cntxt['ufun']
         step = state.step
         current_offer = state.current_offer
         my_offers = []
@@ -308,9 +315,9 @@ class ItayNegotiator(ANL2025Negotiator):
         negotiator, cntxt = self.negotiators[negotiator_id]
         nmi = negotiator.nmi
         level = self._get_progress(negotiator_id)
-        ufun: SideUFun = cntxt["ufun"]
+        ufun: SideUFun = self.ufun#cntxt["ufun"]
         if not is_edge_agent(self):
-           ufun: CenterUFun = cntxt['ufun']
+           ufun: CenterUFun = self.ufun#cntxt['ufun']
         step = state.step
         current_offer = state.current_offer
         my_offers = []
