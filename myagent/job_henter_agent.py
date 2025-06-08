@@ -51,6 +51,7 @@ class JobHunterNegotiator(ANL2025Negotiator):
         self.max_cases_to_compute = 10e4
         self.is_mcuf = (not is_edge_agent(self)) and self.preferences.short_type_name == 'MCUF'
         self.can_compute_all_pos = self.can_all_possib_be_computed()
+        self.options_by_utilities = []
 
 
     def propose(

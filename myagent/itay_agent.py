@@ -108,8 +108,8 @@ class ItayNegotiator(ANL2025Negotiator):
             outcomes.append(self.current_offer)
             for outcome in outcomes:
                 try:
-                    i_rejected = dict_outcome_space[negotiator_id][outcome][2]
-                    opp_rejected = dict_outcome_space[negotiator_id][outcome][3]
+                    i_rejected = dict_outcome_space[negotiator_id][outcome][1]
+                    opp_rejected = dict_outcome_space[negotiator_id][outcome][2]
                 except: 
                   i_rejected = opp_rejected = 0
                 
@@ -142,8 +142,8 @@ class ItayNegotiator(ANL2025Negotiator):
             # rest_combs = itertools.combinations(self._get_possible_outcomes(negotiator_id), len(self.negotiators.keys()) - (len_ctxt + 1))
             
             try:
-                i_rejected = dict_outcome_space[negotiator_id][outcome][2]
-                opp_rejected = dict_outcome_space[negotiator_id][outcome][3]
+                i_rejected = dict_outcome_space[negotiator_id][outcome][1]
+                opp_rejected = dict_outcome_space[negotiator_id][outcome][2]
             except: 
                 i_rejected = opp_rejected = 0
             # print(opp_rejected)
@@ -226,7 +226,7 @@ class ItayNegotiator(ANL2025Negotiator):
 
         for o in outcomes:
             i_rej, opp_rej = existing_outcomes.get(o, [0, 0])
-            dict_outcome_space[o] = [ufun(o), level, i_rej, opp_rej]
+            dict_outcome_space[o] = [level, i_rej, opp_rej]
 
         self.trace_by_neg[negotiator_id] = dict_outcome_space
         return dict_outcome_space
